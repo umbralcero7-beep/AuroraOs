@@ -5,10 +5,24 @@ import http from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import pg from "pg";
+const { Pool } = pg;
 
 const app = express();
 const PORT = 3000;
 const DB_FILE = path.join(process.cwd(), "aurora_db.json");
+
+// Initialize PostgreSQL connection pool if DATABASE_URL is configured (e.g. on Supabase)
+let pool: pg.Pool | null = null;
+if (process.env.DATABASE_URL) {
+  console.log("Configurando conexión a base de datos PostgreSQL (Supabase)...");
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false // Necessary for hosted platforms like Supabase / Render
+    }
+  });
+}
 
 // Real-Time WebSocket Connections State
 interface ConnectedClient {
@@ -1889,36 +1903,82 @@ const DEFAULT_STATE = {
 };
 
 // Database Read/Write Helpers
-function loadState() {
+let memoryState: any = null;
+
+async function loadState(): Promise<any> {
+  // If PostgreSQL is available, fetch state from database
+  if (pool) {
+    try {
+      const res = await pool.query("SELECT data FROM aurora_state WHERE id = 'main'");
+      if (res.rows.length > 0) {
+        memoryState = res.rows[0].data;
+        return memoryState;
+      }
+      // Seeding database with initial default/local state
+      console.log("No se encontró estado en PostgreSQL, buscando copia local de respaldo...");
+      let initialState = DEFAULT_STATE;
+      if (fs.existsSync(DB_FILE)) {
+        try {
+          initialState = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+        } catch (e) {
+          console.error("Copia local dañada, usando DEFAULT_STATE:", e);
+        }
+      }
+      await pool.query(
+        "INSERT INTO aurora_state (id, data) VALUES ('main', $1) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data",
+        [initialState]
+      );
+      memoryState = initialState;
+      return memoryState;
+    } catch (err) {
+      console.error("Error al cargar estado de PostgreSQL, usando respaldo local:", err);
+    }
+  }
+
+  // Fallback to reading local JSON database
   try {
     if (fs.existsSync(DB_FILE)) {
       const raw = fs.readFileSync(DB_FILE, "utf-8");
-      return JSON.parse(raw);
+      memoryState = JSON.parse(raw);
+      return memoryState;
     }
-    // Write default if not present
     fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_STATE, null, 2), "utf-8");
-    return DEFAULT_STATE;
+    memoryState = DEFAULT_STATE;
+    return memoryState;
   } catch (err) {
-    console.error("No se pudo leer la base de datos, usando por defecto:", err);
-    return DEFAULT_STATE;
+    console.error("No se pudo leer la base de datos local, usando por defecto:", err);
+    return memoryState || DEFAULT_STATE;
   }
 }
 
-function saveState(state: any) {
+async function saveState(state: any): Promise<void> {
+  memoryState = state;
+
+  // Asynchronously save to PostgreSQL if available
+  if (pool) {
+    pool.query(
+      "INSERT INTO aurora_state (id, data) VALUES ('main', $1) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()",
+      [state]
+    ).catch((err: any) => {
+      console.error("Error asíncrono al guardar estado en PostgreSQL:", err);
+    });
+  }
+
+  // Local JSON database file fallback backup
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), "utf-8");
   } catch (err) {
-    console.error("No se pudo escribir la base de datos:", err);
+    console.error("No se pudo escribir la base de datos local:", err);
   }
 }
 
 // Security Check Middleware
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   if (req.body && typeof req.body === "object") {
     const stringified = JSON.stringify(req.body);
     const attack = detectAttackAttempt(stringified);
     if (attack.detected) {
-      const state = loadState();
+      const state = await loadState();
       const ip = req.ip || req.headers["x-forwarded-for"] || "127.0.0.1";
       const newLog = {
         id: `sec-attack-${Date.now()}`,
@@ -1929,7 +1989,7 @@ app.use((req, res, next) => {
         severity: attack.severity
       };
       state.securityLogs.unshift(newLog);
-      saveState(state);
+      await saveState(state);
       
       return res.status(403).json({
         error: "Bloqueado por Aurora Shield v4.5 (Filtro de inyección activa detectado)",
@@ -1991,8 +2051,8 @@ app.all("/api/python/*", async (req, res) => {
   }
 });
 
-app.get("/api/state", (req, res) => {
-  const state = loadState();
+app.get("/api/state", async (req, res) => {
+  const state = await loadState();
   res.json(state);
 });
 
@@ -2017,13 +2077,13 @@ app.post("/api/printed-tickets/clear", (req, res) => {
 });
 
 // Universal Action endpoint for state mutations
-app.post("/api/action", (req, res) => {
+app.post("/api/action", async (req, res) => {
   const { action, payload } = req.body;
   if (!action) {
     return res.status(400).json({ error: "No action specified" });
   }
 
-  const state = loadState();
+  const state = await loadState();
 
   try {
     switch (action) {
@@ -2066,7 +2126,7 @@ app.post("/api/action", (req, res) => {
           twoFactorEnabled: false
         };
         state.users.push(newUser);
-        saveState(state);
+        await saveState(state);
         return res.json({ success: true, user: newUser });
       }
       case "RECORD_FAILED_LOGIN": {
@@ -2081,7 +2141,7 @@ app.post("/api/action", (req, res) => {
           details: `Intento de login fallido para: ${payload.email}. Motivo: ${payload.details || 'Contraseña errónea'}.`,
           severity: "MEDIUM"
         });
-        saveState(state);
+        await saveState(state);
         break;
       }
       case "ADD_USER": {
@@ -2241,7 +2301,7 @@ app.post("/api/action", (req, res) => {
         return res.status(400).json({ error: `Acción desconocida: ${action}` });
     }
 
-    saveState(state);
+    await saveState(state);
 
     // Real-Time WebSockets Orchestration & Thermal Printing
     if (action === "CREATE_COMANDA") {
@@ -2426,8 +2486,29 @@ wss.on("connection", (ws: WebSocket) => {
   });
 });
 
+// Initialize PostgreSQL schema table
+async function initDatabaseSchema() {
+  if (!pool) return;
+  try {
+    console.log("Verificando tabla aurora_state en base de datos PostgreSQL (Supabase)...");
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS aurora_state (
+        id VARCHAR(50) PRIMARY KEY,
+        data JSONB NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("Tabla aurora_state verificada o creada con éxito.");
+  } catch (err) {
+    console.error("Error al inicializar el esquema de la base de datos PostgreSQL:", err);
+  }
+}
+
 // Configure Vite middleware in development environment, serve static assets in production
 async function startServer() {
+  // Initialize PostgreSQL schema if configured
+  await initDatabaseSchema();
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
