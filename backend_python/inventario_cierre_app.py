@@ -191,15 +191,15 @@ def init_db():
 # 2. ESQUEMAS DE VALIDACIÓN PYDANTIC (FastAPI)
 # =====================================================================
 class ConfigNotifRequest(BaseModel):
-    email_destino: str = Field(..., example="gerente@grocer.com")
-    telefono_destino: str = Field(..., example="+573155556677")
+    email_destino: str = Field(..., json_schema_extra={"example": "gerente@grocer.com"})
+    telefono_destino: str = Field(..., json_schema_extra={"example": "+573155556677"})
     smtp_server: Optional[str] = "smtp.gmail.com"
     smtp_port: Optional[int] = 587
     smtp_user: Optional[str] = "notificaciones@grocer.com"
     smtp_password: Optional[str] = "password"
 
 class VentaPruebaRequest(BaseModel):
-    codigo_producto: str = Field(..., example="01")
+    codigo_producto: str = Field(..., json_schema_extra={"example": "01"})
     cantidad_salon: int = Field(default=0, ge=0)
     cantidad_domicilio: int = Field(default=0, ge=0)
     fecha: Optional[str] = None  # Formato YYYY-MM-DD, por defecto hoy
