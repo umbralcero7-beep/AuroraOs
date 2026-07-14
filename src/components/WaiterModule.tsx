@@ -63,6 +63,7 @@ export default function WaiterModule({
   const [searchQuery, setSearchQuery] = useState('');
   const [cart, setCart] = useState<{ item: MenuItem; qty: number; notes: string }[]>([]);
   const [sendingOrder, setSendingOrder] = useState(false);
+  const [mobileSubTab, setMobileSubTab] = useState<'menu' | 'cart'>('menu');
 
   // Filter Active / Prepared comandas for the current waiter to show notifications
   const waiterReadyComandas = currentComandas.filter(
@@ -183,10 +184,12 @@ export default function WaiterModule({
       </header>
 
       {/* Main Content split view */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
         
         {/* Left pane: Tables Map or Product catalog */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-6">
+        <div className={`flex-1 p-4 md:p-6 overflow-y-auto space-y-6 ${
+          selectedTable && mobileSubTab === 'cart' ? 'hidden lg:block' : 'block'
+        }`}>
           
           {/* Active Servings Alertas */}
           {waiterReadyComandas.length > 0 && (
@@ -246,6 +249,7 @@ export default function WaiterModule({
                       key={table.id}
                       onClick={() => {
                         setSelectedTable(table);
+                        setMobileSubTab('menu');
                         // Prepopulate default details if occupied
                         if (isOccupied) {
                           setPeopleCount(activeComanda.guestsCount || 2);
@@ -325,8 +329,34 @@ export default function WaiterModule({
                 </div>
               </div>
 
+              {/* MOBILE SUB-TAB SWITCHER (Visible only on lg:hidden) */}
+              <div className="flex lg:hidden bg-stone-900 p-1 rounded-xl border border-stone-850 gap-1">
+                <button
+                  onClick={() => setMobileSubTab('menu')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    mobileSubTab === 'menu'
+                      ? 'bg-amber-500 text-stone-950 shadow-md font-extrabold'
+                      : 'text-stone-400 hover:text-stone-200'
+                  }`}
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  <span>1. Añadir Platos</span>
+                </button>
+                <button
+                  onClick={() => setMobileSubTab('cart')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                    mobileSubTab === 'cart'
+                      ? 'bg-amber-500 text-stone-950 shadow-md font-extrabold'
+                      : 'text-stone-400 hover:text-stone-200'
+                  }`}
+                >
+                  <ShoppingBag className="h-3.5 w-3.5" />
+                  <span>2. Ver Pedido ({cart.length})</span>
+                </button>
+              </div>
+
               {/* Hybrid Search Bar */}
-              <div className="space-y-3">
+              <div className={`space-y-3 ${mobileSubTab === 'menu' ? 'block' : 'hidden lg:block'}`}>
                 <div className="relative">
                   <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-stone-500" />
                   <input
@@ -387,7 +417,9 @@ export default function WaiterModule({
 
         {/* Right pane: Waite Cart Side panel */}
         {selectedTable && (
-          <div className="w-80 bg-stone-950 border-l border-stone-850 flex flex-col shrink-0">
+          <div className={`w-full lg:w-80 bg-stone-950 border-t lg:border-t-0 lg:border-l border-stone-850 flex flex-col shrink-0 ${
+            mobileSubTab === 'cart' ? 'block' : 'hidden lg:flex'
+          }`}>
             <div className="p-4 border-b border-stone-850 bg-stone-900/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShoppingBag className="h-4 w-4 text-amber-500" />

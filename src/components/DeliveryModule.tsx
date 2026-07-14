@@ -430,10 +430,10 @@ export default function DeliveryModule({
         </div>
 
         {/* MASTER SWITCH BUTTONS */}
-        <div className="flex bg-[#070913] border border-slate-800 p-1 rounded-2xl shrink-0 self-start md:self-auto shadow-inner">
+        <div className="flex flex-col sm:flex-row w-full sm:w-auto bg-[#070913] border border-slate-800 p-1 rounded-2xl shrink-0 shadow-inner">
           <button
             onClick={() => setActiveTab('recepcion')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex-1 sm:flex-none ${
               activeTab === 'recepcion'
                 ? 'bg-gradient-to-r from-cyan-500/15 to-blue-500/15 border border-cyan-500/30 text-cyan-300 shadow-md shadow-cyan-500/5'
                 : 'text-slate-500 hover:text-slate-400'
@@ -445,7 +445,7 @@ export default function DeliveryModule({
           
           <button
             onClick={() => setActiveTab('domiciliario')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer ${
+            className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex-1 sm:flex-none ${
               activeTab === 'domiciliario'
                 ? 'bg-gradient-to-r from-cyan-500/15 to-blue-500/15 border border-cyan-500/30 text-cyan-300 shadow-md shadow-cyan-500/5'
                 : 'text-slate-500 hover:text-slate-400'
@@ -462,11 +462,11 @@ export default function DeliveryModule({
         
         {/* --- MODULE 1: RECEPCIONISTA EXPERIENCE --- */}
         {activeTab === 'recepcion' && (
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             
             {/* Sidebar navigation inside module */}
-            <div className="w-16 md:w-56 bg-[#080B16] border-r border-slate-800/80 flex flex-col justify-between py-4 shrink-0">
-              <div className="space-y-1 px-2">
+            <div className="w-full md:w-56 bg-[#080B16] border-b md:border-b-0 md:border-r border-slate-800/80 flex flex-row md:flex-col justify-between p-2 md:py-4 shrink-0 gap-2">
+              <div className="flex flex-row md:flex-col gap-1 px-2 w-full md:w-auto">
                 {[
                   { id: 'toma_pedidos', label: 'Toma de Pedidos', icon: Layers },
                   { id: 'radar_gps', label: 'Radar de Monitoreo', icon: Map },
@@ -478,7 +478,7 @@ export default function DeliveryModule({
                     <button
                       key={item.id}
                       onClick={() => setRecepSubTab(item.id as any)}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-mono text-xs text-left transition-all cursor-pointer ${
+                      className={`flex-1 md:w-full flex items-center justify-center md:justify-start gap-2.5 md:gap-3 px-3 py-3 rounded-xl font-mono text-xs text-left transition-all cursor-pointer ${
                         isSel 
                           ? 'bg-cyan-500/10 text-cyan-300 font-extrabold border-l-2 border-cyan-500' 
                           : 'text-slate-500 hover:bg-slate-900/40 hover:text-slate-300'
@@ -486,7 +486,7 @@ export default function DeliveryModule({
                       title={item.label}
                     >
                       <Icon className="h-4 w-4 text-cyan-400 shrink-0" />
-                      <span className="hidden md:inline">{item.label}</span>
+                      <span className="hidden sm:inline">{item.label}</span>
                     </button>
                   );
                 })}
@@ -1098,11 +1098,11 @@ export default function DeliveryModule({
 
         {/* --- MODULE 2: DOMICILIARIO Y LOGÍSTICA --- */}
         {activeTab === 'domiciliario' && (
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             
             {/* Sidebar navigation inside module 2 */}
-            <div className="w-16 md:w-56 bg-[#080B16] border-r border-slate-800/80 flex flex-col justify-between py-4 shrink-0">
-              <div className="space-y-1 px-2">
+            <div className="w-full md:w-56 bg-[#080B16] border-b md:border-b-0 md:border-r border-slate-800/80 flex flex-row md:flex-col justify-between p-2 md:py-4 shrink-0 gap-2">
+              <div className="flex flex-row md:flex-col gap-1 px-2 w-full md:w-auto">
                 {[
                   { id: 'kanban', label: 'Tablero Kanban Despacho', icon: CheckSquare },
                   { id: 'phone_simulator', label: 'App del Repartidor', icon: Smartphone }
@@ -1113,7 +1113,7 @@ export default function DeliveryModule({
                     <button
                       key={item.id}
                       onClick={() => setLogisticsSubTab(item.id as any)}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl font-mono text-xs text-left transition-all cursor-pointer ${
+                      className={`flex-1 md:w-full flex items-center justify-center md:justify-start gap-2.5 md:gap-3 px-3 py-3 rounded-xl font-mono text-xs text-left transition-all cursor-pointer ${
                         isSel 
                           ? 'bg-cyan-500/10 text-cyan-300 font-extrabold border-l-2 border-cyan-500' 
                           : 'text-slate-500 hover:bg-slate-900/40 hover:text-slate-300'
@@ -1121,7 +1121,7 @@ export default function DeliveryModule({
                       title={item.label}
                     >
                       <Icon className="h-4 w-4 text-cyan-400 shrink-0" />
-                      <span className="hidden md:inline">{item.label}</span>
+                      <span className="hidden sm:inline">{item.label}</span>
                     </button>
                   );
                 })}

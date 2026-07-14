@@ -934,11 +934,508 @@ export default function ReportModule({
     printWindow.document.close();
   };
 
+  const handleExportSystemManualPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const dateStr = new Date().toLocaleDateString();
+    
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Manual Técnico y de Operaciones - Aurora OS v4.5</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+          
+          body {
+            font-family: 'Inter', sans-serif;
+            color: #0f172a;
+            line-height: 1.6;
+            padding: 40px;
+            margin: 0;
+            background-color: #ffffff;
+          }
+          
+          /* Cover Page */
+          .cover {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            page-break-after: always;
+            padding: 40px;
+            box-sizing: border-box;
+            border: 4px solid #0f172a;
+            background-color: #fafafa;
+          }
+          .cover-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .cover-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: 2px;
+            color: #0284c7;
+          }
+          .cover-version {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            background-color: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+          }
+          .cover-body {
+            margin-top: 60px;
+            margin-bottom: 60px;
+          }
+          .cover-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.1;
+            color: #0f172a;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            border-bottom: 5px solid #0284c7;
+            padding-bottom: 20px;
+          }
+          .cover-subtitle {
+            font-size: 18px;
+            color: #475569;
+            font-weight: 400;
+            max-width: 600px;
+          }
+          .cover-footer {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 20px;
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            justify-content: space-between;
+          }
+          
+          /* Document Structure */
+          h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: #0f172a;
+            margin-top: 30px;
+            margin-bottom: 15px;
+          }
+          h1 {
+            font-size: 26px;
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            page-break-before: always;
+          }
+          h2 {
+            font-size: 20px;
+            color: #0369a1;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+          }
+          h3 {
+            font-size: 15px;
+            color: #0f172a;
+            font-weight: 700;
+          }
+          p, li {
+            font-size: 13px;
+            color: #334155;
+            text-align: justify;
+          }
+          ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+          }
+          li {
+            margin-bottom: 6px;
+          }
+          
+          /* Highlight Boxes */
+          .note-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #0284c7;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+          }
+          .note-box-title {
+            font-weight: bold;
+            color: #0369a1;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-family: 'Space Grotesk', sans-serif;
+          }
+          
+          .warning-box {
+            background-color: #fffbeb;
+            border-left: 4px solid #d97706;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+          }
+          .warning-box-title {
+            font-weight: bold;
+            color: #b45309;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-family: 'Space Grotesk', sans-serif;
+          }
+          
+          /* Tables */
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12px;
+          }
+          th, td {
+            border: 1px solid #cbd5e1;
+            padding: 10px;
+            text-align: left;
+          }
+          th {
+            background-color: #f1f5f9;
+            font-weight: bold;
+            color: #1e293b;
+          }
+          tr:nth-child(even) {
+            background-color: #f8fafc;
+          }
+          
+          /* Utility Classes */
+          .code {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #0f172a;
+          }
+          
+          .page-footer {
+            margin-top: 60px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+          }
+          
+          .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 80px;
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+          }
+          .signature-block {
+            width: 240px;
+            border-top: 2.5px solid #0f172a;
+            text-align: center;
+            padding-top: 8px;
+            font-size: 11px;
+            font-weight: bold;
+          }
+          
+          @media print {
+            body {
+              padding: 0;
+            }
+            .no-print {
+              display: none;
+            }
+          }
+        </style>
+      </head>
+      <body>
+      
+        <!-- COVER PAGE -->
+        <div class="cover">
+          <div class="cover-header">
+            <div class="cover-logo">AURORA <span style="font-weight:300; color:#475569;">OS</span></div>
+            <div class="cover-version">SISTEMA v4.5</div>
+          </div>
+          <div class="cover-body">
+            <div class="cover-title">Manual de Usuario y Operaciones</div>
+            <div class="cover-subtitle">Guía de Entrenamiento, Administración y Control del Ecosistema ERP para Restaurantes y Asadores de Alta Demanda.</div>
+          </div>
+          <div class="cover-footer">
+            <div>Generado el: ${dateStr}</div>
+            <div>Aurora Software Inc. — Todos los derechos reservados © 2026</div>
+          </div>
+        </div>
+        
+        <!-- TABLE OF CONTENTS -->
+        <h1>Tabla de Contenidos</h1>
+        <ol style="font-size: 13px; line-height: 2.0; color: #1e293b; font-weight: 500; padding-left: 25px;">
+          <li>Introducción y Arquitectura de Aurora OS</li>
+          <li>Módulo de POS & Control de Caja Registradora</li>
+          <li>Control de Porciones del Asador y Auditoría de Inventarios de Pollo</li>
+          <li>Módulo de Comandas & Mesas (Waiter)</li>
+          <li>Módulo de Cocina Integrado (KDS - Kitchen Display System)</li>
+          <li>Inventario General ERP, Recetas y Alertas Críticas</li>
+          <li>Módulo Contable, Control de Gastos y Flujo de Colchón</li>
+          <li>Personal, Recursos Humanos, Control de Turnos y Bitácora</li>
+          <li>Asistente Inteligente con IA (Cero AI)</li>
+          <li>Sincronización Avanzada con Google Workspace & Drive</li>
+          <li>Módulo de Ciberseguridad, Whitelisting de Terminales y Soporte</li>
+        </ol>
+        
+        <!-- SECTION 1 -->
+        <h1>1. Introducción y Arquitectura de Aurora OS</h1>
+        <p>
+          <strong>Aurora OS v4.5</strong> es un sistema operativo y plataforma ERP de vanguardia diseñada específicamente para la administración de restaurantes, asadores y negocios gastronómicos con flujos de alta densidad transaccional. La arquitectura del sistema se fundamenta en un modelo <strong>multisede unificado</strong> que permite sincronizar múltiples sucursales físicas en tiempo real desde una base de datos centralizada en la nube.
+        </p>
+        <p>
+          La interfaz de usuario ha sido optimizada para operación táctil y de escritorio, implementando un diseño de alta legibilidad, respuesta instantánea en microsegundos y arquitectura <strong>PWA (Progressive Web App)</strong>, lo cual asegura que el sistema pueda operar sin contratiempos incluso en situaciones de inestabilidad de red o desconexión a internet local.
+        </p>
+        
+        <!-- SECTION 2 -->
+        <h1>2. Módulo de POS & Control de Caja Registradora</h1>
+        <p>
+          El módulo de <strong>Punto de Venta (POS)</strong> es el corazón transaccional de cada sede. Permite a los cajeros registrar ventas rápidas, asociar propinas voluntarias, aplicar descuentos autorizados y procesar múltiples métodos de pago integrados (Efectivo, Tarjeta, Transferencia digital o Mixto).
+        </p>
+        <h2>Flujo de Apertura e Inicio de Turno</h2>
+        <p>
+          Cada jornada de ventas debe iniciarse obligatoriamente con una apertura de caja formal en la pestaña <span class="code">POS & Caja</span>. El sistema solicitará al operador el ingreso del <strong>Monto Base (Caja Menor / Base de Cambio)</strong>. Este valor quedará registrado de forma inalterable y servirá como base para la conciliación del arqueo de fin de turno.
+        </p>
+        <h2>Facturación con Cumplimiento Legal (Resoluciones DIAN)</h2>
+        <p>
+          Las facturas emitidas por Aurora OS incorporan automáticamente los parámetros fiscales vigentes, incluyendo:
+        </p>
+        <ul>
+          <li><strong>Prefijo de Facturación y Consecutivo Autoincremental:</strong> Configurado dinámicamente según la sede activa.</li>
+          <li><strong>Impuesto al Consumo (8%):</strong> Desglosado automáticamente del subtotal en platos clasificados.</li>
+          <li><strong>Información DIAN:</strong> Número de resolución, rango de folios autorizados y fecha de vigencia impresa en cada tirilla/PDF.</li>
+        </ul>
+        <h2>Cierre de Caja y Conciliación Contable (Arqueo Z)</h2>
+        <p>
+          Al finalizar el turno, el cajero ejecuta el <strong>Cierre de Caja</strong>. El sistema genera un informe consolidado donde calcula automáticamente las ventas teóricas según los registros del software y las compara con los valores reales reportados por el cajero. Cualquier diferencia (faltante o sobrante) es registrada inmediatamente en los bitácoras de auditoría de ciberseguridad.
+        </p>
+
+        <!-- SECTION 3 -->
+        <h1>3. Control de Porciones del Asador y Auditoría de Inventarios de Pollo</h1>
+        <p>
+          Debido a la alta merma y la criticidad de la materia prima en los restaurantes de asador de pollos, Aurora OS incorpora un <strong>algoritmo propietario de auditoría matemática de porciones</strong>. Este sistema contrarresta de manera automática la fuga de inventario en cocina.
+        </p>
+        
+        <div class="note-box">
+          <div class="note-box-title">Fórmula de Equivalencia de Asador (Auditoría de Conversión)</div>
+          <p style="margin: 0;">
+            Para obtener el total consolidado de materia prima despachada, el software aplica la siguiente constante matemática sobre todas las facturas procesadas en el periodo:
+            <br><br>
+            <span class="code" style="font-size: 12px; font-weight: bold; display: block; text-align: center; margin: 5px 0;">
+              Total Equivalente = (Cuartos vendidos * 0.25) + (Medios vendidos * 0.50) + (Enteros vendidos * 1.00)
+            </span>
+          </p>
+        </div>
+
+        <h2>Clasificación y Detección Automática de Productos</h2>
+        <p>
+          El software analiza en tiempo real el catálogo de artículos facturados en las comandas y los encasilla bajo tres categorías estrictas de asador:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Fracción</th>
+              <th>Constante Equivalente</th>
+              <th>Patrón de Coincidencia de Nombre (POS)</th>
+              <th>Propósito en Auditoría</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cuarto de Pollo</strong></td>
+              <td>0.25</td>
+              <td>Contiene "1/4", "cuarto" o "cuarta"</td>
+              <td>Verificación de presas individuales (pechuga/muslo).</td>
+            </tr>
+            <tr>
+              <td><strong>Medio Pollo</strong></td>
+              <td>0.50</td>
+              <td>Contiene "1/2", "medio" o "media"</td>
+              <td>Control de salidas de mitades físicas del asador.</td>
+            </tr>
+            <tr>
+              <td><strong>Pollo Entero</strong></td>
+              <td>1.00</td>
+              <td>Contiene "un pollo", "pollo entero", "1 pollo", "pollo completo" o "pollo" genérico</td>
+              <td>Control de unidades completas retiradas de las varas de cocción.</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="warning-box">
+          <div class="warning-box-title">Regla de Negocio para el Administrador de Sede</div>
+          <p style="margin: 0;">
+            El reporte diario de equivalencia en pollos enteros debe cruzarse directamente con el conteo físico de la materia prima entregada por el proveedor. Discrepancias superiores al <strong>3%</strong> indican una inconsistencia grave (pérdida de porciones, despacho de platos sin facturar o fuga en cocina) que amerita auditoría del supervisor del asador.
+          </p>
+        </div>
+
+        <!-- SECTION 4 -->
+        <h1>4. Módulo de Comandas & Mesas (Waiter)</h1>
+        <p>
+          Este módulo está diseñado para la operación de los meseros en el salón mediante dispositivos móviles (tablets o smartphones).
+        </p>
+        <h2>Asignación y Estado de Mesas</h2>
+        <p>
+          La pantalla del salón ofrece una representación visual del mapa de mesas de la sede. Las mesas cambian de color de acuerdo a su estado en tiempo real:
+        </p>
+        <ul>
+          <li><strong>Verde (Disponible):</strong> Mesa desocupada lista para recibir clientes.</li>
+          <li><strong>Rojo (Ocupada - En Espera):</strong> Comanda levantada que está siendo cocinada o procesada.</li>
+          <li><strong>Azul (Servido):</strong> Pedido entregado a la mesa; clientes consumiendo en salón.</li>
+          <li><strong>Gris (Pendiente de Pago / Cuenta):</strong> Clientes solicitaron la cuenta, mesa en fase de facturación.</li>
+        </ul>
+        <h2>Generación de Pedidos en Salón</h2>
+        <p>
+          Al abrir una mesa, el mesero selecciona los platos del menú interactivo, especifica notas de preparación personalizadas (ej. "sin cebolla", "pollo bien tostado") y envía la comanda directamente al KDS de la cocina sin necesidad de desplazarse físicamente.
+        </p>
+
+        <!-- SECTION 5 -->
+        <h1>5. Módulo de Cocina Integrado (KDS - Kitchen Display System)</h1>
+        <p>
+          El <strong>Kitchen Display System (KDS)</strong> reemplaza las tradicionales e ineficientes comandas de papel térmico por pantallas digitales de alta visibilidad para el chef y el equipo de asador.
+        </p>
+        <h2>Estados de Comandas en Cocina</h2>
+        <p>
+          Toda orden enviada desde el salón o la caja entra al KDS con el estado <span class="code">PENDIENTE</span>. El personal de cocina puede interactuar con las tarjetas táctiles para transicionar las órdenes:
+        </p>
+        <ol>
+          <li><strong>PENDIENTE:</strong> Tarjeta en borde rojo parpadeante. Indica que la orden no ha sido iniciada.</li>
+          <li><strong>COCINANDO:</strong> El parrillero o cocinero presiona "Preparar". La tarjeta cambia a color naranja y el sistema inicia un contador de tiempo interno de preparación.</li>
+          <li><strong>LISTO:</strong> Al finalizar, se marca como "Listo". La tarjeta cambia a verde, emite un aviso sonoro y notifica inmediatamente al mesero a través del sistema de notificaciones de salón.</li>
+          <li><strong>ENTREGADO:</strong> El mesero retira el pedido de la barra de despacho y la orden se archiva del monitor de cocina.</li>
+        </ol>
+
+        <!-- SECTION 6 -->
+        <h1>6. Inventario General ERP, Recetas y Alertas Críticas</h1>
+        <p>
+          La gestión de materias primas en Aurora OS es completamente automatizada y cuenta con un sistema de <strong>descuento dinámico de stock por receta</strong>. Cuando un cajero vende un plato en el POS, el software descuenta de forma automática las porciones exactas de los insumos asociados en la base de datos (ej: papas, salsas, empaques, pollos enteros).
+        </p>
+        <h2>Configuración de Stock Mínimo y Alertas de Reabastecimiento</h2>
+        <p>
+          Cada insumo en el inventario posee un campo parametrizado de <span class="code">Stock Mínimo Alerta</span>. Si el inventario físico de un artículo desciende por debajo de este umbral, el sistema realiza tres acciones en segundo plano:
+        </p>
+        <ul>
+          <li>Genera una notificación crítica persistente en el panel de control del administrador.</li>
+          <li>Marca el insumo en color rojo de alerta dentro del panel de inventarios.</li>
+          <li>Incluye automáticamente el producto en la lista de stock crítico para la exportación a Google Sheets.</li>
+        </ul>
+
+        <!-- SECTION 7 -->
+        <h1>7. Módulo Contable, Control de Gastos y Flujo de Colchón</h1>
+        <p>
+          Aurora OS automatiza el seguimiento de la rentabilidad del restaurante, permitiendo registrar todos los <strong>gastos y egresos operativos</strong> y cruzarlos contra la facturación bruta.
+        </p>
+        <h2>Registro de Gastos</h2>
+        <p>
+          Los egresos se clasifican por categorías estándar (Materia Prima, Nómina, Servicios Públicos, Alquiler, Mantenimiento e Imprevistos). Es obligatorio adjuntar el número de factura o soporte legal del gasto para mantener la consistencia contable del sistema.
+        </p>
+        <h2>El Colchón Financiero (Amortiguación de Riesgo de Caja)</h2>
+        <p>
+          Una de las herramientas contables exclusivas de Aurora OS es la métrica de <strong>Colchón Financiero</strong>. El sistema calcula los gastos fijos históricos y determina cuántos días de operación continua puede soportar la sede activa con el saldo neto de caja acumulado, sirviendo como una alarma de salud financiera temprana contra déficit operacionales.
+        </p>
+
+        <!-- SECTION 8 -->
+        <h1>8. Personal, Recursos Humanos, Control de Turnos y Bitácora</h1>
+        <p>
+          La consistencia operativa depende de la disciplina del personal. El módulo de <strong>Personal & Bitácora (RRHH)</strong> permite centralizar los expedientes de todos los colaboradores del restaurante (Meseros, Cajeros, Cocineros, Parrilleros, Repartidores).
+        </p>
+        <h2>Registro de Turnos e Incidencias (Novedades)</h2>
+        <p>
+          El sistema cuenta con un diario de novedades para registrar el desempeño de la jornada: retardos, ausencias justificadas, horas extra laboradas o felicitaciones de servicio. Asimismo, se puede visualizar la planilla de salarios base devengados para facilitar el proceso de pago al final de la quincena o mes.
+        </p>
+
+        <!-- SECTION 9 -->
+        <h1>9. Asistente Inteligente con IA (Cero AI)</h1>
+        <p>
+          Aurora OS incorpora un modelo inteligente de asistencia denominado <strong>Asistente Cero</strong>. Impulsado por algoritmos avanzados y Gemini API, este asistente procesa consultas complejas en lenguaje natural para proporcionar respuestas predictivas del negocio.
+        </p>
+        <h2>Funcionalidades de Cero AI</h2>
+        <ul>
+          <li><strong>Predicción de Abastecimiento:</strong> Analiza el histórico de ventas y predice cuántas unidades de pollo e insumos críticos se requerirán para los próximos fines de semana de alta demanda.</li>
+          <li><strong>Auditoría de Anomalías:</strong> Detecta patrones de facturación atípicos, como aperturas de caja con bases sospechosas o anulaciones de facturas fuera del horario habitual de operación.</li>
+          <li><strong>Comandos de Voz/Texto Directos:</strong> Permite consultar el estado de caja, mejores platos vendidos o alertas de stock mediante una barra de chat conversacional integrada.</li>
+        </ul>
+
+        <!-- SECTION 10 -->
+        <h1>10. Sincronización Avanzada con Google Workspace & Drive</h1>
+        <p>
+          La integración bidireccional con Google Workspace permite a la junta directiva y al área de contabilidad exportar reportes consolidados directamente al ecosistema en la nube del usuario autorizado.
+        </p>
+        <h2>El Cuadro de Mando Financiero ERP</h2>
+        <p>
+          Al presionar "Generar Cuadro de Mando", el sistema crea automáticamente un libro de cálculo en Google Sheets estructurado de manera rigurosa en <strong>4 pestañas automatizadas</strong>:
+        </p>
+        <ol>
+          <li><strong>📊 Resumen Ejecutivo:</strong> Contiene las métricas financieras agregadas del restaurante (Ingresos, Egresos, Utilidad Neta, Inventario Crítico y diagnósticos automáticos de salud operacional).</li>
+          <li><strong>💰 Facturación Detallada:</strong> Vuelca el registro histórico de todas las facturas POS emitidas en la jornada.</li>
+          <li><strong>📉 Stock de Alerta:</strong> Genera un listado en tiempo real de todos los insumos bajo mínimos que requieren reabastecimiento urgente.</li>
+          <li><strong>🧾 Control de Egresos:</strong> Sincroniza la tabla de egresos registrados para auditoría contable.</li>
+        </ol>
+
+        <!-- SECTION 11 -->
+        <h1>11. Módulo de Ciberseguridad, Whitelisting de Terminales y Soporte</h1>
+        <p>
+          Para salvaguardar la integridad de la base de datos contra accesos no autorizados o fraudes internos de empleados, Aurora OS integra un protocolo estricto de <strong>Seguridad Operativa</strong>.
+        </p>
+        <h2>Control de Acceso mediante Whitelisting</h2>
+        <p>
+          Solo los dispositivos y terminales de cajero autorizados mediante su dirección o identificador único pueden procesar cobros y aperturas de caja. El administrador puede incluir o remover terminales del Whitelist de manera instantánea en el panel de seguridad.
+        </p>
+        <h2>Registro de Auditoría de Intrusiones (Logs Inalterables)</h2>
+        <p>
+          Cualquier intento de alteración de base de datos, intentos fallidos de inicio de sesión, cambios en la resolución DIAN o accesos fuera de rango horario quedan documentados en un historial de logs blindado que no puede ser eliminado por los cajeros, proveyendo un rastro de auditoría transparente ante cualquier eventualidad legal.
+        </p>
+
+        <!-- SIGNATURES -->
+        <div class="signature-section">
+          <div class="signature-block">
+            Director General de Operaciones
+            <div style="font-size: 9px; font-weight: normal; color: #64748b; margin-top: 5px;">Aurora OS Authorized Signatory</div>
+          </div>
+          <div class="signature-block">
+            Gerente de Auditoría & Control
+            <div style="font-size: 9px; font-weight: normal; color: #64748b; margin-top: 5px;">Aurora OS Security Supervisor</div>
+          </div>
+        </div>
+
+        <div class="page-footer">
+          Manual de Operaciones y Referencia del Sistema Aurora OS v4.5.<br>
+          © 2026 Aurora Software Inc. Todos los datos han sido estructurados para control de calidad interna del restaurante.
+        </div>
+
+        <script>
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+            }, 300);
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
   // Calculations
   const totalSales = currentInvoices.reduce((acc, curr) => acc + curr.total, 0);
   const totalExpenses = currentGastos.reduce((acc, curr) => acc + curr.amount, 0);
   const netProfit = totalSales - totalExpenses;
   const avgTicket = currentInvoices.length > 0 ? totalSales / currentInvoices.length : 0;
+
 
   // Best seller logic
   const itemCounts: { [name: string]: number } = {};
@@ -1079,7 +1576,7 @@ export default function ReportModule({
             </div>
 
             {/* Export Actions Grid - EXCLUSIVE PDF REPORTS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 pt-1">
               
               {/* Card 1: Billing / Invoices */}
               <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between gap-3 hover:border-slate-700 transition-all">
@@ -1156,6 +1653,28 @@ export default function ReportModule({
                   >
                     <FileText className="h-4 w-4 shrink-0" />
                     Generar Reporte PDF
+                  </button>
+                </div>
+              </div>
+
+              {/* Card 5: Manual de Usuario del Sistema */}
+              <div className="bg-slate-900/60 border border-blue-500/20 rounded-xl p-4 flex flex-col justify-between gap-3 hover:border-blue-500/40 transition-all shadow-md shadow-blue-500/[0.02]">
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1 text-[8px] font-bold font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded uppercase tracking-widest border border-blue-500/20">
+                    Documentación OS
+                  </span>
+                  <h4 className="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider">Manual de Operaciones</h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
+                    Guía de entrenamiento oficial y manual de procedimientos técnicos para todo el sistema ERP.
+                  </p>
+                </div>
+                <div className="pt-2">
+                  <button
+                    onClick={handleExportSystemManualPDF}
+                    className="w-full py-2 px-3 bg-gradient-to-r from-blue-600/25 to-blue-500/10 border border-blue-500/30 hover:border-blue-400 hover:from-blue-500 hover:to-blue-400 hover:text-slate-950 text-blue-300 rounded-lg text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+                  >
+                    <FileText className="h-4 w-4 shrink-0" />
+                    Generar Manual PDF
                   </button>
                 </div>
               </div>
