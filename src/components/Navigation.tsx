@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Coffee
+  Coffee,
+  Download,
+  Cloud
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -28,6 +30,8 @@ interface NavigationProps {
   securityCount: number;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
+  isStandalone?: boolean;
+  onInstall?: () => void;
 }
 
 export default function Navigation({
@@ -39,7 +43,9 @@ export default function Navigation({
   currentUser,
   securityCount,
   isMobileOpen,
-  onMobileClose
+  onMobileClose,
+  isStandalone = false,
+  onInstall
 }: NavigationProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(() => {
     return localStorage.getItem('sidebar_collapsed') === 'true';
@@ -63,6 +69,7 @@ export default function Navigation({
     { id: 'contabilidad', name: 'Contabilidad & Colchón', icon: DollarSign, roles: ['ADMIN', 'SUPPORT', 'FINANCE'] },
     { id: 'rrhh', name: 'Personal & Bitácora', icon: Users2, roles: ['ADMIN', 'SUPPORT', 'HR'] },
     { id: 'asistente', name: 'Asistente IA (Cero)', icon: BrainCircuit, roles: ['ADMIN', 'SUPPORT', 'CASHIER', 'WAITER', 'CHEF', 'HR', 'FINANCE', 'INVENTORY'] },
+    { id: 'workspace', name: 'Integración Google', icon: Cloud, roles: ['ADMIN', 'SUPPORT', 'CASHIER', 'WAITER', 'CHEF', 'HR', 'FINANCE', 'INVENTORY'] },
     { id: 'seguridad', name: 'Soporte & Ciberseguridad', icon: Lock, roles: ['ADMIN', 'SUPPORT'] }
   ];
 
@@ -98,8 +105,24 @@ export default function Navigation({
         <div className={`p-4 border-b border-zinc-800 bg-zinc-900/10 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-lg shadow-blue-900/30">
-                A
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-blue-950/40 border border-zinc-800">
+                <img 
+                  src="/icon.jpg" 
+                  alt="Aurora OS Logo" 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      const fallback = document.createElement('div');
+                      fallback.className = 'w-full h-full bg-blue-600 flex items-center justify-center font-bold text-white text-sm';
+                      fallback.innerText = 'A';
+                      parent.appendChild(fallback);
+                    }
+                  }}
+                />
               </div>
               {(!isCollapsed || isMobileOpen) && (
                 <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1 whitespace-nowrap animate-fade-in">
@@ -198,6 +221,34 @@ export default function Navigation({
               </button>
             );
           })}
+
+          {/* Seccion de Instalacion PWA */}
+          {isStandalone ? (
+            <div className={`mt-4 px-2.5 py-2 rounded-md bg-emerald-950/40 border border-emerald-900/50 flex items-center ${isCollapsed && !isMobileOpen ? 'justify-center' : 'gap-3'}`} title="Aplicación ejecutándose en modo nativo">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+              {(!isCollapsed || isMobileOpen) && (
+                <span className="text-[10px] text-emerald-400 font-mono font-semibold uppercase tracking-wider">
+                  App Instalada (PWA)
+                </span>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={onInstall}
+              className={`w-full flex items-center rounded-md text-xs transition-all duration-200 mt-4 cursor-pointer p-2 border border-dashed border-zinc-800 bg-zinc-950/60 hover:bg-zinc-900 hover:border-blue-500/50 text-zinc-400 hover:text-white ${
+                (isCollapsed && !isMobileOpen) ? 'justify-center' : 'gap-2.5'
+              }`}
+              title="Instalar App en este Dispositivo"
+            >
+              <Download className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+              {(!isCollapsed || isMobileOpen) && (
+                <div className="text-left leading-tight">
+                  <span className="font-semibold block text-[11px]">Instalar App</span>
+                  <span className="text-[9px] text-zinc-500 block">Acceso de escritorio</span>
+                </div>
+              )}
+            </button>
+          )}
         </nav>
 
       {/* Footer Profile Details + Sentinel Block */}

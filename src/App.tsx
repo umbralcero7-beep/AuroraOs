@@ -29,6 +29,8 @@ import DeliveryModule from './components/DeliveryModule';
 import HrModule from './components/HrModule';
 import SecuritySupportModule from './components/SecuritySupportModule';
 import AiAssistantModule from './components/AiAssistantModule';
+import GoogleWorkspaceModule from './components/GoogleWorkspaceModule';
+import PwaInstallModal from './components/PwaInstallModal';
 
 import { 
   User, 
@@ -223,6 +225,45 @@ export default function App() {
   const [loginError, setLoginError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // PWA Install State & Logic
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [showPwaModal, setShowPwaModal] = useState(false);
+
+  useEffect(() => {
+    const checkStandalone = () => {
+      const isStandaloneMode = 
+        window.matchMedia('(display-mode: standalone)').matches || 
+        (window.navigator as any).standalone;
+      setIsStandalone(!!isStandaloneMode);
+    };
+
+    checkStandalone();
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsStandalone(true);
+      console.log('PWA was installed successfully');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    setShowPwaModal(true);
+  };
 
   // Connection & status
   const [isConnected, setIsConnected] = useState(true);
@@ -662,6 +703,8 @@ export default function App() {
         securityCount={securityLogs.length}
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
+        isStandalone={isStandalone}
+        onInstall={handleInstallClick}
       />
 
       {/* Main Container */}
@@ -974,6 +1017,18 @@ export default function App() {
               onTriggerAction={triggerAction}
             />
           )}
+
+          {activeTab === 'workspace' && (
+            <GoogleWorkspaceModule 
+              sedeId={activeSedeId}
+              invoices={invoices}
+              insumos={insumos}
+              menuItems={menuItems}
+              currentUser={currentUser}
+              onTriggerAction={triggerAction}
+              refreshData={fetchState}
+            />
+          )}
         </div>
 
         {/* 🚀 Dynamic Floating In-App Push Toasts Container */}
@@ -1012,6 +1067,13 @@ export default function App() {
             </div>
           ))}
         </div>
+
+        {/* 🚀 PWA Installation Guide Modal */}
+        <PwaInstallModal 
+          isOpen={showPwaModal}
+          onClose={() => setShowPwaModal(false)}
+          deferredPrompt={deferredPrompt}
+        />
 
       </div>
 

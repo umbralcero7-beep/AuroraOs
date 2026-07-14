@@ -423,9 +423,10 @@ export default function PosModule({
     } else if (paymentMethod === 'TRANSFERENCIA') {
       invoicePayments = [{ method: 'TRANSFERENCIA', amount: total }];
     } else if (paymentMethod === 'MIXTO') {
+      const cashPart = (receivedCash > 0 && receivedCash < total) ? receivedCash : Math.floor(total / 2);
       invoicePayments = [
-        { method: 'EFECTIVO', amount: Math.floor(total / 2) },
-        { method: 'TARJETA_DEBITO', amount: total - Math.floor(total / 2) }
+        { method: 'EFECTIVO', amount: cashPart },
+        { method: 'TARJETA_DEBITO', amount: total - cashPart }
       ];
     }
 

@@ -180,7 +180,7 @@ export default function CashCheckoutModal({
       customerName: invoiceType === 'ELECTRONICA' ? customerName.trim() : (customerName.trim() || 'Consumidor Final'),
       customerDocument: invoiceType === 'ELECTRONICA' ? customerDocument.trim() : (customerDocument.trim() || '222222222222'),
       customerEmail: customerEmail.trim(),
-      receivedCash: method === 'EFECTIVO' ? cash : 0,
+      receivedCash: method === 'EFECTIVO' ? cash : (method === 'MIXTO' ? (receivedCash !== null ? receivedCash : Math.floor(total / 2)) : 0),
       paymentMethod: method
     });
   };
@@ -413,7 +413,7 @@ export default function CashCheckoutModal({
             </span>
 
             {/* Tactile Payment Method buttons */}
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <button
                 type="button"
                 onClick={() => {
@@ -463,6 +463,23 @@ export default function CashCheckoutModal({
               >
                 <Wallet className="h-5 w-5" />
                 <span className="text-xs font-semibold">Transferencia</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedMethod('MIXTO');
+                  setReceivedCash(Math.floor(total / 2));
+                  setSelectedBills([]);
+                }}
+                className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center justify-center gap-1 text-center cursor-pointer ${
+                  selectedMethod === 'MIXTO'
+                    ? 'border-[#06B6D4] bg-[#06B6D4]/10 text-[#06B6D4] font-extrabold shadow-md shadow-[#06B6D4]/5'
+                    : 'border-slate-800 bg-[#121A2E]/30 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                }`}
+              >
+                <Sparkles className="h-5 w-5 text-amber-400 animate-pulse" />
+                <span className="text-xs font-semibold">Pago Mixto</span>
               </button>
             </div>
 
@@ -609,7 +626,7 @@ export default function CashCheckoutModal({
             )}
 
             {/* IF TARJETA / TRANSFERENCIA: Nice summary message */}
-            {selectedMethod !== 'EFECTIVO' && (
+            {(selectedMethod === 'TARJETA' || selectedMethod === 'TRANSFERENCIA') && (
               <div className="bg-[#121A2E]/50 border border-blue-950/60 rounded-2xl p-5 space-y-3 animate-in fade-in duration-200">
                 <div className="flex items-center gap-2 text-[#06B6D4] font-bold text-xs font-mono uppercase tracking-wider">
                   <CheckCircle className="h-4 w-4" />
@@ -623,6 +640,105 @@ export default function CashCheckoutModal({
                 <div className="flex justify-between items-center bg-[#0D1425]/60 border border-slate-800 p-3.5 rounded-xl">
                   <span className="text-[10px] font-mono text-slate-400 uppercase">Monto a Transar:</span>
                   <span className="text-base font-bold text-emerald-400 font-mono">${total.toLocaleString()} COP</span>
+                </div>
+              </div>
+            )}
+
+            {/* IF MIXTO: Interactive split payment config */}
+            {selectedMethod === 'MIXTO' && (
+              <div className="bg-[#121A2E]/50 border border-blue-950/60 rounded-2xl p-5 space-y-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 text-[#06B6D4] font-bold text-xs font-mono uppercase tracking-wider">
+                  <Sparkles className="h-4 w-4 text-amber-400" />
+                  Configurar Pago Mixto (Efectivo + Digital)
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                  Distribuye qué porción del total de <strong className="text-slate-100">${total.toLocaleString()} COP</strong> se cancelará en efectivo y cuál con tarjeta/transferencia digital.
+                </p>
+
+                {/* Quick Split Presets */}
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const half = Math.floor(total / 2);
+                      setReceivedCash(half);
+                      setValidationError('');
+                    }}
+                    className="p-2 bg-slate-800/60 hover:bg-slate-850 text-slate-300 hover:text-white border border-slate-700/50 hover:border-slate-600 rounded-xl text-xs font-mono font-bold cursor-pointer transition-all"
+                  >
+                    50% / 50%
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cashPart = Math.floor(total * 0.3);
+                      setReceivedCash(cashPart);
+                      setValidationError('');
+                    }}
+                    className="p-2 bg-slate-800/60 hover:bg-slate-850 text-slate-300 hover:text-white border border-slate-700/50 hover:border-slate-600 rounded-xl text-xs font-mono font-bold cursor-pointer transition-all"
+                  >
+                    30% Efe / 70% Dig
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cashPart = Math.floor(total * 0.7);
+                      setReceivedCash(cashPart);
+                      setValidationError('');
+                    }}
+                    className="p-2 bg-slate-800/60 hover:bg-slate-850 text-slate-300 hover:text-white border border-slate-700/50 hover:border-slate-600 rounded-xl text-xs font-mono font-bold cursor-pointer transition-all"
+                  >
+                    70% Efe / 30% Dig
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  {/* Cash portion */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1 font-mono uppercase tracking-wide">
+                      <Coins className="h-3.5 w-3.5 text-[#06B6D4]" />
+                      Pago en Efectivo (COP)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs text-slate-500 font-mono">$</span>
+                      <input
+                        type="text"
+                        value={receivedCash !== null ? receivedCash.toLocaleString() : '0'}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                          let val = onlyNums ? parseInt(onlyNums) : 0;
+                          if (val > total) val = total;
+                          setReceivedCash(val);
+                          setValidationError('');
+                        }}
+                        className="w-full bg-[#0D1425]/60 border border-slate-800 rounded-xl py-2 pl-7 pr-4 text-xs text-slate-100 font-mono focus:outline-none focus:border-[#06B6D4]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Digital portion */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 flex items-center gap-1 font-mono uppercase tracking-wide">
+                      <CreditCard className="h-3.5 w-3.5 text-violet-400" />
+                      Pago Digital (COP)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs text-slate-500 font-mono">$</span>
+                      <input
+                        type="text"
+                        disabled
+                        value={receivedCash !== null ? (total - receivedCash).toLocaleString() : total.toLocaleString()}
+                        className="w-full bg-[#0D1425]/30 border border-slate-850 rounded-xl py-2 pl-7 pr-4 text-xs text-slate-400 font-mono select-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#0D1425]/60 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between text-xs font-mono">
+                  <span className="text-slate-400 text-[10px] uppercase">Distribución de Caja:</span>
+                  <span className="font-bold text-emerald-400">
+                    ${(receivedCash || 0).toLocaleString()} (Efe) + ${(total - (receivedCash || 0)).toLocaleString()} (Dig)
+                  </span>
                 </div>
               </div>
             )}
