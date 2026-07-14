@@ -15,11 +15,13 @@ import {
   RefreshCw,
   LogOut,
   UserCheck,
-  FileDown
+  FileDown,
+  TrendingUp,
+  Sparkles
 } from 'lucide-react';
 import { googleSignIn, logout, initAuth, getAccessToken } from '../lib/firebase';
 import { User as FirebaseUser } from 'firebase/auth';
-import { Invoice, Insumo, MenuItem } from '../types';
+import { Invoice, Insumo, MenuItem, Gasto } from '../types';
 
 interface GoogleWorkspaceModuleProps {
   sedeId: string;
@@ -27,6 +29,7 @@ interface GoogleWorkspaceModuleProps {
   insumos: Insumo[];
   menuItems: MenuItem[];
   currentUser: any;
+  gastos?: Gasto[];
   onTriggerAction?: (actionType: string, payload: any) => void;
   refreshData?: () => void;
 }
@@ -55,6 +58,7 @@ export default function GoogleWorkspaceModule({
   insumos,
   menuItems,
   currentUser,
+  gastos = [],
   onTriggerAction,
   refreshData
 }: GoogleWorkspaceModuleProps) {
@@ -464,6 +468,156 @@ export default function GoogleWorkspaceModule({
       window.open(spreadsheetUrl, '_blank');
     } catch (err: any) {
       setErrorMessage('Error al exportar a Google Sheets: ' + err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ==========================================
+  // GOOGLE SHEETS ERP CONSOLIDATED DASHBOARD (OPCIÓN 3)
+  // ==========================================
+  const handleExportConsolidatedERPDashboard = async () => {
+    if (!accessToken) return;
+    
+    setIsLoading(true);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    try {
+      const sheetTitle = `Cuadro de Mando Financiero ERP - Aurora OS (${new Date().toLocaleDateString()})`;
+      
+      // Step 1: Create a Google Spreadsheet with 4 Sheets (pestañas)
+      const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          properties: { title: sheetTitle },
+          sheets: [
+            { properties: { title: '📊 Resumen Ejecutivo' } },
+            { properties: { title: '💰 Facturación Detallada' } },
+            { properties: { title: '📉 Stock de Alerta' } },
+            { properties: { title: '🧾 Control de Egresos' } }
+          ]
+        })
+      });
+
+      if (!createRes.ok) throw new Error('No se pudo crear el Cuadro de Mando consolidado en Drive');
+      const spreadsheet = await createRes.json();
+      if (!spreadsheet || !spreadsheet.spreadsheetId) throw new Error('La creación del libro devolvió datos inválidos');
+
+      const spreadsheetId = spreadsheet.spreadsheetId;
+      const spreadsheetUrl = spreadsheet.spreadsheetUrl || `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`;
+
+      // Step 2: Prepare data for each tab
+      
+      // Tab 1: Resumen Ejecutivo
+      const filteredInvoices = invoices.filter(i => i.sedeId === sedeId);
+      const filteredGastos = (gastos || []).filter(g => g.sedeId === sedeId);
+      const filteredInsumos = insumos.filter(i => i.sedeId === sedeId);
+      
+      const totalSales = filteredInvoices.reduce((acc, curr) => acc + curr.total, 0);
+      const totalExpenses = filteredGastos.reduce((acc, curr) => acc + curr.amount, 0);
+      const netProfit = totalSales - totalExpenses;
+      const lowStockCount = filteredInsumos.filter(i => i.stock <= i.minStock).length;
+      const activeMenuItemsCount = menuItems.filter(m => m.sedeId === sedeId).length;
+
+      const summaryValues = [
+        ["CUADRO DE MANDO FINANCIERO ERP - AURORA OS", ""],
+        ["Reporte Consolidado de Operación e Inteligencia Financiera", ""],
+        ["", ""],
+        ["INFORMACIÓN DEL REPORTE", ""],
+        ["Fecha de Generación", new Date().toLocaleString()],
+        ["Sede ID", sedeId],
+        ["Usuario Responsable", user?.displayName || currentUser?.name || "Administrador"],
+        ["", ""],
+        ["MÉTRICAS CLAVE", "VALOR"],
+        ["Ingresos Totales (POS + Domicilios)", totalSales],
+        ["Egresos Totales (Gastos)", totalExpenses],
+        ["Utilidad de Operación Neta", netProfit],
+        ["Insumos por Debajo del Stock Crítico", lowStockCount],
+        ["Total Platos Activos en el Menú", activeMenuItemsCount],
+        ["", ""],
+        ["ESTADO DE SALUD FINANCIERA", netProfit >= 0 ? "EXCEDENTE OPERACIONAL (SALDO POSITIVO)" : "DÉFICIT OPERACIONAL (ALERTA DE CAJA)"],
+        ["ESTADO DE INVENTARIO", lowStockCount > 0 ? `REABASTECIMIENTO REQUERIDO (${lowStockCount} INSUMOS EN CRÍTICO)` : "INVENTARIO SANO"]
+      ];
+
+      // Tab 2: Facturación Detallada
+      const billingHeaders = ['ID Factura', 'Nro Factura', 'Cliente', 'Documento', 'Total (COP)', 'Método Pago', 'Fecha'];
+      const billingRows = filteredInvoices.map(inv => [
+        inv.id,
+        inv.invoiceNumber,
+        inv.customerName,
+        inv.customerDocument || 'N/A',
+        inv.total,
+        inv.payments ? inv.payments.map(p => p.method).join(', ') : 'N/A',
+        new Date(inv.timestamp || Date.now()).toLocaleDateString()
+      ]);
+      const billingValues = [billingHeaders, ...billingRows];
+
+      // Tab 3: Stock de Alerta
+      const stockHeaders = ['ID Insumo', 'Nombre Insumo', 'SKU / Código', 'Categoría', 'Stock Actual', 'Mínimo Alerta', 'Unidad Medida', 'Estado Stock'];
+      const stockRows = filteredInsumos.map(ins => [
+        ins.id,
+        ins.name,
+        ins.sku,
+        ins.category,
+        ins.stock,
+        ins.minStock,
+        ins.unit,
+        ins.stock <= ins.minStock ? 'CRÍTICO' : 'OK'
+      ]);
+      const stockValues = [stockHeaders, ...stockRows];
+
+      // Tab 4: Control de Egresos
+      const expenseHeaders = ['ID Gasto', 'Descripción Gasto', 'Categoría', 'Monto (COP)', 'Soporte / Factura', 'Fecha Registro'];
+      const expenseRows = filteredGastos.map(g => [
+        g.id,
+        g.description,
+        g.category,
+        g.amount,
+        g.receiptNumber || 'N/A',
+        new Date(g.timestamp || Date.now()).toLocaleDateString()
+      ]);
+      const expenseValues = [expenseHeaders, ...expenseRows];
+
+      // Step 3: Call batchUpdate to write data into all 4 tabs in a single call
+      const appendRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          valueInputOption: 'USER_ENTERED',
+          data: [
+            { range: '📊 Resumen Ejecutivo!A1', majorDimension: 'ROWS', values: summaryValues },
+            { range: '💰 Facturación Detallada!A1', majorDimension: 'ROWS', values: billingValues },
+            { range: '📉 Stock de Alerta!A1', majorDimension: 'ROWS', values: stockValues },
+            { range: '🧾 Control de Egresos!A1', majorDimension: 'ROWS', values: expenseValues }
+          ]
+        })
+      });
+
+      if (!appendRes.ok) throw new Error('No se pudieron rellenar los datos del cuadro de mando en las pestañas');
+
+      // Add to recent sheets list
+      const newSheetRecord = {
+        id: spreadsheetId,
+        name: sheetTitle,
+        url: spreadsheetUrl,
+        date: new Date().toLocaleString()
+      };
+
+      setRecentSheets(prev => [newSheetRecord, ...prev.slice(0, 9)]);
+      setSuccessMessage(`¡Cuadro de Mando Financiero ERP (Opción 3) generado con éxito en Google Sheets!`);
+
+      // Open sheet in a new tab
+      window.open(spreadsheetUrl, '_blank');
+    } catch (err: any) {
+      setErrorMessage('Error al exportar Cuadro de Mando: ' + err.message);
     } finally {
       setIsLoading(false);
     }
@@ -928,6 +1082,61 @@ export default function GoogleWorkspaceModule({
             {activeSubTab === 'sheets' && (
               <div className="space-y-6 animate-fade-in">
                 
+                {/* 🌟 OPCIÓN 3: CUADRO DE MANDO ERP CONSOLIDADO MULTI-PESTAÑA */}
+                <div className="relative overflow-hidden bg-gradient-to-r from-zinc-950 via-[#0a1224] to-zinc-950 border border-[#38BDF8]/30 rounded-3xl p-6 shadow-2xl shadow-[#38BDF8]/5">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none">
+                    <Sparkles className="h-40 w-40 text-[#38BDF8]" />
+                  </div>
+                  
+                  <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+                    <div className="space-y-2 max-w-2xl text-left">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 font-mono text-[9px] font-bold rounded-full uppercase tracking-widest">
+                        <Sparkles className="h-3 w-3 animate-pulse" /> Opción 3 Implementada
+                      </div>
+                      <h3 className="text-lg font-black text-white flex items-center gap-2">
+                        Cuadro de Mando Integrado ERP <span className="text-cyan-400">| Control Multi-Pestaña</span>
+                      </h3>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        Sincroniza y vuelca el estado de operación general del restaurante en un único libro de cálculo estructurado con <strong className="text-cyan-300">4 pestañas automatizadas</strong> en tu Google Drive. Ideal para juntas directivas, contabilidad avanzada o auditoría de un solo vistazo:
+                      </p>
+                      
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-[10px] font-mono text-zinc-400">
+                        <div className="flex items-center gap-1.5 bg-zinc-950/50 p-2 rounded-xl border border-zinc-900">
+                          <span className="text-xs">📊</span>
+                          <span>Resumen Ejecutivo</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-zinc-950/50 p-2 rounded-xl border border-zinc-900">
+                          <span className="text-xs">💰</span>
+                          <span>Facturas de Hoy</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-zinc-950/50 p-2 rounded-xl border border-zinc-900">
+                          <span className="text-xs">📉</span>
+                          <span>Stock de Alerta</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-zinc-950/50 p-2 rounded-xl border border-zinc-900">
+                          <span className="text-xs">🧾</span>
+                          <span>Control de Gastos</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="w-full lg:w-auto shrink-0">
+                      <button
+                        onClick={handleExportConsolidatedERPDashboard}
+                        disabled={isLoading}
+                        className="w-full lg:w-auto px-6 py-4 bg-[#06B6D4] hover:bg-[#22D3EE] disabled:bg-[#06B6D4]/40 text-black font-black text-xs font-mono tracking-wider rounded-2xl transition-all shadow-lg shadow-cyan-950/40 cursor-pointer flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 select-none"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-black" />
+                        ) : (
+                          <FileSpreadsheet className="h-4 w-4 text-black" />
+                        )}
+                        {isLoading ? 'SINCRONIZANDO ERP...' : 'GENERAR CUADRO DE MANDO'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Grid for export tools */}
                 <div className="bg-[#121A2E]/20 border border-zinc-800 rounded-3xl p-5">
                   <div className="border-b border-zinc-800 pb-3 mb-5">

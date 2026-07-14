@@ -1025,6 +1025,7 @@ export default function App() {
               insumos={insumos}
               menuItems={menuItems}
               currentUser={currentUser}
+              gastos={gastos}
               onTriggerAction={triggerAction}
               refreshData={fetchState}
             />

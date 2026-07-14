@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Fondo con un sutil degradado radial para dar profundidad -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#071126" />
+      <stop offset="100%" stop-color="#02050d" />
+    </radialGradient>
+
+    <!-- Degradados para las espirales del vórtice (Púrpura a Azul Eléctrico y Cian) -->
+    <linearGradient id="spiralGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8a2be2" />
+      <stop offset="50%" stop-color="#4a00e0" />
+      <stop offset="100%" stop-color="#00d2ff" />
+    </linearGradient>
+
+    <linearGradient id="spiralGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe" />
+      <stop offset="100%" stop-color="#4facfe" />
+    </linearGradient>
+
+    <!-- Filtro de resplandor (Glow) para simular la luz de la aurora -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Contenedor del icono (Esquinas redondeadas estilo App de escritorio/móvil) -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="2" />
+
+  <!-- Grupo del Vórtice de Luz -->
+  <g transform="translate(256, 220)" filter="url(#glow)">
+    <!-- Espiral 1 -->
+    <path d="M0,0 C30,-40 90,-50 120,-10 C150,30 130,90 80,120 C30,150 -50,130 -80,80 C-110,30 -90,-50 -40,-80 C10,-110 110,-90 150,-30" 
+          fill="none" stroke="url(#spiralGrad1)" stroke-width="16" stroke-linecap="round" opacity="0.9" />
+          
+    <!-- Espiral 2 (Invertida y desfasada para generar dinamismo) -->
+    <path d="M0,0 C-30,40 -90,50 -120,10 C-150,-30 -130,-90 -80,-120 C-30,-150 50,-130 80,-80 C110,-30 90,50 40,80 C-10,110 -110,90 -150,30" 
+          fill="none" stroke="url(#spiralGrad2)" stroke-width="10" stroke-linecap="round" opacity="0.7" />
+
+    <!-- Núcleo brillante en el centro del vórtice -->
+    <circle cx="0" cy="0" r="14" fill="#ffffff" filter="url(#glow)" />
+    <circle cx="0" cy="0" r="6" fill="#7af7e8" />
+  </g>
+
+  <!-- Texto de marca: Aurora (Sin el sufijo OS) -->
+  <text x="256" y="440" 
+        font-family="'Montserrat', 'Inter', 'Helvetica', sans-serif" 
+        font-size="42" 
+        font-weight="700" 
+        letter-spacing="9" 
+        fill="#ffffff" 
+        text-anchor="middle" 
+        opacity="0.95">AURORA</text>
+</svg>

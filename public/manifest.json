@@ -3,14 +3,14 @@
   "name": "Aurora OS - Restaurant Management",
   "icons": [
     {
-      "src": "/icon_pwa.jpg",
-      "type": "image/jpeg",
+      "src": "/icon_pwa.svg",
+      "type": "image/svg+xml",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon_pwa.jpg",
-      "type": "image/jpeg",
+      "src": "/icon_pwa.svg",
+      "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any maskable"
     }
