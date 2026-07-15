@@ -19,7 +19,8 @@ import {
   Coffee,
   Calculator,
   TrendingUp,
-  Coins
+  Coins,
+  X
 } from 'lucide-react';
 import { Insumo, MenuItem, Supplier } from '../types';
 
@@ -43,7 +44,7 @@ export default function InventoryModule({
   const currentInsumos = insumos.filter(i => i.sedeId === sedeId);
   const currentMenu = menuItems.filter(m => m.sedeId === sedeId);
 
-  const [activeSubTab, setActiveSubTab] = useState<'INSUMOS' | 'CARTA' | 'SUPPLIERS' | 'INJECT_SUMINISTROS' | 'CIERRE_CAJA'>('INSUMOS');
+  const [activeSubTab, setActiveSubTab] = useState<'INSUMOS' | 'CARTA' | 'SUPPLIERS' | 'RECIBIR_PEDIDO' | 'UPLOAD_CARTA' | 'CIERRE_CAJA'>('INSUMOS');
   
   // Python FastAPI integration states
   const [emailDestino, setEmailDestino] = useState('prueba_gerente@grocer.com');
@@ -66,6 +67,53 @@ export default function InventoryModule({
   const [ejecutandoCierre, setEjecutandoCierre] = useState(false);
   const [cierreResult, setCierreResult] = useState<any | null>(null);
   const [notifSaving, setNotifSaving] = useState(false);
+
+  const [showAddSupplierModal, setShowAddSupplierModal] = useState(false);
+  const [newSupplier, setNewSupplier] = useState({ name: '', phone: '', email: '', category: '' });
+
+  const [selectedSupplierForOrder, setSelectedSupplierForOrder] = useState('');
+  const [orderItems, setOrderItems] = useState<{insumoId: string, qty: number, cost: number}[]>([]);
+
+  const handleAddSupplier = async () => {
+    if (!newSupplier.name) return;
+    await onTriggerAction('ADD_SUPPLIER', { id: `sup-${Date.now()}`, ...newSupplier });
+    setShowAddSupplierModal(false);
+    setNewSupplier({ name: '', phone: '', email: '', category: '' });
+  };
+
+  const handleAddOrderItem = () => {
+    setOrderItems([...orderItems, { insumoId: '', qty: 0, cost: 0 }]);
+  };
+
+  const handleReceiveOrder = async () => {
+    if (!selectedSupplierForOrder || orderItems.length === 0) return;
+    for (const item of orderItems) {
+      if (item.insumoId && item.qty > 0) {
+        const insumo = currentInsumos.find(i => i.id === item.insumoId);
+        if (insumo) {
+          await onTriggerAction('UPDATE_INSUMO_STOCK', {
+            id: item.insumoId,
+            stock: insumo.stock + item.qty
+          });
+        }
+      }
+    }
+    // Record expense for the order
+    const totalCost = orderItems.reduce((sum, item) => sum + (item.qty * item.cost), 0);
+    if (totalCost > 0) {
+      await onTriggerAction('ADD_GASTO', {
+        id: `gasto-${Date.now()}`,
+        sedeId,
+        description: `Pedido de proveedor (Sede ${sedeId})`,
+        category: 'MATERIA_PRIMA',
+        amount: totalCost,
+        timestamp: new Date().toISOString()
+      });
+    }
+    setOrderItems([]);
+    setSelectedSupplierForOrder('');
+    alert('✅ Pedido recibido y stock actualizado exitosamente.');
+  };
 
   const loadPythonBackendData = async () => {
     setLoadingPythonProducts(true);
@@ -199,12 +247,12 @@ export default function InventoryModule({
     }
   };
   
-  // Bulk supply injector state
-  const [csvText, setCsvText] = useState(
-    `# SKU, NUEVO_STOCK, COSTO_UNIDAD_COP\nRAW-BEEF-01, 35.0, 31500\nRAW-CHEESE-04, 18.0, 17800\nRAW-AVO-05, 80.0, 2400`
+  // Menu Parser AI state
+  const [menuUploadText, setMenuUploadText] = useState(
+    `Entradas:\n- Empanadas de carne $4500\n- Patacones con hogao $6000\n\nPlatos Fuertes:\n- Bandeja Paisa $35000\n- Sancocho de Gallina $28000`
   );
-  const [injectLogs, setInjectLogs] = useState<string[]>([]);
-  const [loadingInject, setLoadingInject] = useState(false);
+  const [parseMenuLogs, setParseMenuLogs] = useState<string[]>([]);
+  const [loadingMenuParse, setLoadingMenuParse] = useState(false);
 
   // New Insumo state
   const [showAddInsumo, setShowAddInsumo] = useState(false);
@@ -216,43 +264,38 @@ export default function InventoryModule({
   const [newMin, setNewMin] = useState(5);
   const [newCost, setNewCost] = useState(10000);
 
-  const handleBulkInject = async () => {
-    setLoadingInject(true);
-    const logs: string[] = [];
-    const payloadToSync: any[] = [];
-
-    const lines = csvText.split('\n');
-    lines.forEach((line, idx) => {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) return;
-
-      const parts = trimmed.split(',');
-      if (parts.length >= 3) {
-        const sku = parts[0].trim();
-        const stock = parseFloat(parts[1].trim());
-        const costPrice = parseFloat(parts[2].trim());
-
-        if (sku && !isNaN(stock) && !isNaN(costPrice)) {
-          payloadToSync.push({ sku, stock, costPrice, sedeId });
-          logs.push(`✅ Procesado con éxito fila ${idx+1}: SKU [${sku}] ajustado a ${stock} unidades. Costo: $${costPrice.toLocaleString()} COP.`);
-        } else {
-          logs.push(`❌ Error en fila ${idx+1}: Datos de formato inválidos en "${trimmed}"`);
+  const handleParseMenu = async () => {
+    if (!menuUploadText.trim()) return;
+    setLoadingMenuParse(true);
+    setParseMenuLogs(['Iniciando análisis de carta con Cero IA...']);
+    
+    try {
+      const res = await fetch('/api/parse-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: menuUploadText, sedeId })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al procesar la carta');
+      
+      setParseMenuLogs(prev => [...prev, `✅ Se detectaron ${data.parsedItems?.length || 0} platos.`]);
+      
+      if (data.parsedItems && data.parsedItems.length > 0) {
+        setParseMenuLogs(prev => [...prev, '🔄 Inyectando platos en la base de datos...']);
+        // Here we can save the items to the DB
+        for (const item of data.parsedItems) {
+           item.id = `menu-item-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+           await onTriggerAction("ADD_MENU_ITEM", item);
         }
-      } else {
-        logs.push(`⚠️ Saltando fila ${idx+1}: Formato incompleto, se esperaban 3 valores.`);
+        setParseMenuLogs(prev => [...prev, '🎉 Menú sincronizado exitosamente.']);
+        refreshData();
       }
-    });
-
-    if (payloadToSync.length > 0) {
-      await onTriggerAction("BULK_UPDATE_INSUMOS", payloadToSync);
-      logs.push(`🎉 Sincronización Heurística ERP Finalizada: ${payloadToSync.length} insumos de stock inyectados con éxito.`);
-      refreshData();
-    } else {
-      logs.push(`❌ No se encontraron datos válidos para procesar.`);
+    } catch (err: any) {
+      setParseMenuLogs(prev => [...prev, `❌ Error: ${err.message}`]);
+    } finally {
+      setLoadingMenuParse(false);
     }
-
-    setInjectLogs(logs);
-    setLoadingInject(false);
   };
 
   const handleAddSingleInsumo = async () => {
@@ -311,10 +354,16 @@ export default function InventoryModule({
               Proveedores
             </button>
             <button 
-              onClick={() => setActiveSubTab('INJECT_SUMINISTROS')}
-              className={`px-3 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${activeSubTab === 'INJECT_SUMINISTROS' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
+              onClick={() => setActiveSubTab('RECIBIR_PEDIDO')}
+              className={`px-3 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${activeSubTab === 'RECIBIR_PEDIDO' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
             >
-              ⚡ Inyectar Suministros
+              Recibir Pedido
+            </button>
+            <button 
+              onClick={() => setActiveSubTab('UPLOAD_CARTA')}
+              className={`px-3 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${activeSubTab === 'UPLOAD_CARTA' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              🪄 Subir Carta (Cero IA)
             </button>
             <button 
               onClick={() => setActiveSubTab('CIERRE_CAJA')}
@@ -433,7 +482,15 @@ export default function InventoryModule({
 
       {activeSubTab === 'SUPPLIERS' && (
         <div className="flex-1 p-6 overflow-y-auto">
-          <h3 className="text-sm font-bold text-slate-300 font-mono mb-4 font-sans">PORTAFOLIO DE PROVEEDORES</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-300 font-mono font-sans">PORTAFOLIO DE PROVEEDORES</h3>
+            <button 
+              onClick={() => setShowAddSupplierModal(true)}
+              className="bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold py-1.5 px-4 rounded-lg text-xs transition-colors shadow-lg"
+            >
+              + Nuevo Proveedor
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {suppliers.map((sup) => (
@@ -453,33 +510,154 @@ export default function InventoryModule({
         </div>
       )}
 
-      {activeSubTab === 'INJECT_SUMINISTROS' && (
+      {activeSubTab === 'RECIBIR_PEDIDO' && (
+        <div className="flex-1 p-6 overflow-y-auto">
+          <h3 className="text-sm font-bold text-slate-300 font-mono mb-4 font-sans">RECEPCIÓN DE PEDIDOS</h3>
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 space-y-6 max-w-3xl">
+            <div>
+              <label className="text-xs font-bold text-slate-400 block mb-2">Seleccionar Proveedor</label>
+              <select 
+                value={selectedSupplierForOrder}
+                onChange={(e) => setSelectedSupplierForOrder(e.target.value)}
+                className="w-full bg-[#030712] border border-[#1e293b] rounded-xl p-3 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe] focus:ring-2 focus:ring-[#00f2fe]/50"
+              >
+                <option value="">-- Seleccione un proveedor --</option>
+                {suppliers.map(s => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.category})</option>
+                ))}
+              </select>
+            </div>
+
+            {selectedSupplierForOrder && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-bold text-slate-300 font-mono">Productos Recibidos</h4>
+                  <button 
+                    onClick={handleAddOrderItem}
+                    className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg transition-colors font-bold"
+                  >
+                    + Añadir Ítem
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  {orderItems.map((item, idx) => (
+                    <div key={idx} className="flex flex-col md:flex-row gap-3 bg-[#030712] border border-[#1e293b] p-3 rounded-xl">
+                      <div className="flex-1">
+                        <label className="text-[10px] text-slate-500 font-mono block mb-1">Insumo</label>
+                        <select 
+                          value={item.insumoId}
+                          onChange={(e) => {
+                            const newItems = [...orderItems];
+                            newItems[idx].insumoId = e.target.value;
+                            setOrderItems(newItems);
+                          }}
+                          className="w-full bg-[#0f172a] border border-[#1e293b] rounded-lg p-2 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                        >
+                          <option value="">Seleccione...</option>
+                          {currentInsumos.filter(i => i.supplierId === selectedSupplierForOrder).map(i => (
+                            <option key={i.id} value={i.id}>{i.name} (SKU: {i.sku})</option>
+                          ))}
+                          {currentInsumos.filter(i => i.supplierId !== selectedSupplierForOrder).map(i => (
+                            <option key={i.id} value={i.id}>{i.name} (Otro Proveedor)</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-full md:w-24">
+                        <label className="text-[10px] text-slate-500 font-mono block mb-1">Cantidad</label>
+                        <input 
+                          type="number"
+                          value={item.qty}
+                          onChange={(e) => {
+                            const newItems = [...orderItems];
+                            newItems[idx].qty = parseFloat(e.target.value);
+                            setOrderItems(newItems);
+                          }}
+                          className="w-full bg-[#0f172a] border border-[#1e293b] rounded-lg p-2 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                        />
+                      </div>
+                      <div className="w-full md:w-32">
+                        <label className="text-[10px] text-slate-500 font-mono block mb-1">Costo Total (COP)</label>
+                        <input 
+                          type="number"
+                          value={item.cost}
+                          onChange={(e) => {
+                            const newItems = [...orderItems];
+                            newItems[idx].cost = parseFloat(e.target.value);
+                            setOrderItems(newItems);
+                          }}
+                          className="w-full bg-[#0f172a] border border-[#1e293b] rounded-lg p-2 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                        />
+                      </div>
+                      <div className="flex items-end pb-1">
+                        <button 
+                          onClick={() => {
+                            const newItems = [...orderItems];
+                            newItems.splice(idx, 1);
+                            setOrderItems(newItems);
+                          }}
+                          className="text-rose-500 hover:text-rose-400 p-1.5 bg-rose-500/10 rounded-lg transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {orderItems.length === 0 && (
+                    <div className="text-center py-6 text-slate-500 text-xs italic">
+                      Añade productos para registrar el pedido.
+                    </div>
+                  )}
+                </div>
+
+                {orderItems.length > 0 && (
+                  <div className="pt-6 border-t border-[#1e293b] flex justify-end">
+                    <button 
+                      onClick={handleReceiveOrder}
+                      className="bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all shadow-lg"
+                    >
+                      Procesar Recepción
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeSubTab === 'UPLOAD_CARTA' && (
         <div className="flex-1 p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-4">
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
                   <Sparkles className="h-4 w-4 text-cyan-400" />
-                  SISTEMA DE INYECCIÓN ERP
+                  PROCESADOR DE CARTAS CERO IA
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Pegue o escriba los datos de los suministros entregados por el proveedor en formato CSV para actualizar el stock y costos de forma automática.
+                  Pegue el texto de la carta de su restaurante (entradas, platos fuertes, bebidas, precios). El sistema detectará automáticamente los productos, categorías y precios, y los añadirá a su menú.
                 </p>
               </div>
 
               <textarea
-                value={csvText}
-                onChange={(e) => setCsvText(e.target.value)}
-                className="w-full h-44 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-emerald-400 font-mono focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                placeholder="SKU, NUEVO_STOCK, COSTO_UNIDAD_COP"
+                value={menuUploadText}
+                onChange={(e) => setMenuUploadText(e.target.value)}
+                className="w-full h-56 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                placeholder="Ejemplo:
+Entradas:
+- Arepas con queso $5000
+
+Platos Fuertes:
+- Churrasco $35000"
               />
 
               <button
-                onClick={handleBulkInject}
-                disabled={loadingInject}
+                onClick={handleParseMenu}
+                disabled={loadingMenuParse}
                 className="w-full bg-cyan-500 hover:bg-cyan-600 disabled:opacity-40 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-colors cursor-pointer"
               >
-                {loadingInject ? 'Procesando Sincronización Heurística...' : 'Efectuar Sincronización de Bodega'}
+                {loadingMenuParse ? 'Analizando con Cero IA...' : 'Procesar Carta con Cero IA'}
               </button>
             </div>
           </div>
@@ -487,16 +665,16 @@ export default function InventoryModule({
           {/* Logs of injection */}
           <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl flex flex-col overflow-hidden h-[420px]">
             <h4 className="text-xs font-mono font-bold text-slate-300 border-b border-slate-800 pb-3 mb-3 shrink-0 flex items-center gap-1.5">
-              <RefreshCw className="h-3.5 w-3.5 text-cyan-400 animate-spin" />
-              CONSOLA DE AJUSTES EN TIEMPO REAL
+              <Terminal className="h-3.5 w-3.5 text-cyan-400" />
+              CONSOLA DE PROCESAMIENTO
             </h4>
             <div className="flex-1 overflow-y-auto space-y-2 pr-1 font-mono text-[10px] text-slate-400">
-              {injectLogs.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-slate-600">
-                  Esperando inyección de datos para procesar registros...
+              {parseMenuLogs.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-slate-600 text-center px-4">
+                  Esperando texto para analizar y categorizar automáticamente...
                 </div>
               ) : (
-                injectLogs.map((log, idx) => (
+                parseMenuLogs.map((log, idx) => (
                   <div key={idx} className="bg-slate-900/60 p-2 rounded border border-slate-850">
                     {log}
                   </div>
@@ -968,6 +1146,72 @@ export default function InventoryModule({
               </button>
               <button onClick={handleAddSingleInsumo} className="bg-cyan-500 text-slate-950 hover:bg-cyan-600 font-bold px-4 py-2 rounded-xl text-xs cursor-pointer">
                 Agregar Insumo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NEW SUPPLIER MODAL */}
+      {showAddSupplierModal && (
+        <div className="fixed inset-0 z-50 bg-[#030712]/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0f172a] border border-[#1e293b] rounded-[2rem] p-8 w-full max-w-md shadow-2xl relative space-y-5">
+            <h3 className="text-sm font-bold text-slate-50 font-sans tracking-tight">Añadir Nuevo Proveedor</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-[10px] text-slate-500 font-mono block mb-1">Nombre Comercial</label>
+                <input 
+                  type="text"
+                  value={newSupplier.name}
+                  onChange={e => setNewSupplier({...newSupplier, name: e.target.value})}
+                  className="w-full bg-[#030712] border border-[#1e293b] rounded-xl p-3 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] text-slate-500 font-mono block mb-1">Teléfono</label>
+                  <input 
+                    type="text"
+                    value={newSupplier.phone}
+                    onChange={e => setNewSupplier({...newSupplier, phone: e.target.value})}
+                    className="w-full bg-[#030712] border border-[#1e293b] rounded-xl p-3 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-500 font-mono block mb-1">Categoría Principal</label>
+                  <input 
+                    type="text"
+                    value={newSupplier.category}
+                    onChange={e => setNewSupplier({...newSupplier, category: e.target.value})}
+                    placeholder="Ej. Carnes"
+                    className="w-full bg-[#030712] border border-[#1e293b] rounded-xl p-3 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-500 font-mono block mb-1">Email (Opcional)</label>
+                <input 
+                  type="email"
+                  value={newSupplier.email}
+                  onChange={e => setNewSupplier({...newSupplier, email: e.target.value})}
+                  className="w-full bg-[#030712] border border-[#1e293b] rounded-xl p-3 text-xs text-slate-50 focus:outline-none focus:border-[#00f2fe]"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-[#1e293b]">
+              <button 
+                onClick={() => setShowAddSupplierModal(false)} 
+                className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs hover:bg-slate-700 transition-all font-semibold"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleAddSupplier} 
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold rounded-xl text-xs transition-all"
+              >
+                Guardar Proveedor
               </button>
             </div>
           </div>

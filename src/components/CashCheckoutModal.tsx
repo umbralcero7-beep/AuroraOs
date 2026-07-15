@@ -225,30 +225,30 @@ export default function CashCheckoutModal({
         </div>
 
         {/* REDESIGNED: Two Main Buttons at the Top for Invoice Type Selector */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-col lg:flex-row gap-3 w-full">
           <button
             type="button"
             onClick={() => {
               setInvoiceType('POS');
               setValidationError('');
             }}
-            className={`p-5 rounded-2xl border-2 text-left transition-all flex items-center justify-between cursor-pointer relative ${
+            className={`flex-1 p-4 rounded-2xl border-2 text-left transition-all flex items-center justify-between cursor-pointer relative ${
               invoiceType === 'POS'
                 ? 'border-[#06B6D4] bg-[#06B6D4]/5 ring-1 ring-[#06B6D4]/30 shadow-lg'
                 : 'border-slate-800 bg-[#121A2E]/40 hover:border-slate-700 hover:bg-[#121A2E]/70'
             }`}
             id="invoice-type-pos"
           >
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${invoiceType === 'POS' ? 'bg-[#06B6D4]/10 text-[#06B6D4]' : 'bg-slate-800/50 text-slate-400'}`}>
-                <Receipt className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl shrink-0 ${invoiceType === 'POS' ? 'bg-[#06B6D4]/10 text-[#06B6D4]' : 'bg-slate-800/50 text-slate-400'}`}>
+                <Receipt className="h-5 w-5 md:h-6 md:w-6" />
               </div>
-              <div>
-                <h4 className="text-base font-extrabold text-slate-100">Venta Interna</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Ticket POS simplificado sin datos de cliente</p>
+              <div className="min-w-0">
+                <h4 className="text-sm md:text-base font-extrabold text-slate-100 truncate">Venta Interna</h4>
+                <p className="text-[10px] md:text-xs text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-none">Ticket POS simplificado sin datos de cliente</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+            <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0 ml-2 hidden sm:block">
               F1
             </span>
           </button>
@@ -259,23 +259,23 @@ export default function CashCheckoutModal({
               setInvoiceType('ELECTRONICA');
               setValidationError('');
             }}
-            className={`p-5 rounded-2xl border-2 text-left transition-all flex items-center justify-between cursor-pointer relative ${
+            className={`flex-1 p-4 rounded-2xl border-2 text-left transition-all flex items-center justify-between cursor-pointer relative ${
               invoiceType === 'ELECTRONICA'
                 ? 'border-[#06B6D4] bg-[#06B6D4]/5 ring-1 ring-[#06B6D4]/30 shadow-lg'
                 : 'border-slate-800 bg-[#121A2E]/40 hover:border-slate-700 hover:bg-[#121A2E]/70'
             }`}
             id="invoice-type-electronic"
           >
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl ${invoiceType === 'ELECTRONICA' ? 'bg-[#06B6D4]/10 text-[#06B6D4]' : 'bg-slate-800/50 text-slate-400'}`}>
-                <QrCode className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className={`p-2.5 rounded-xl shrink-0 ${invoiceType === 'ELECTRONICA' ? 'bg-[#06B6D4]/10 text-[#06B6D4]' : 'bg-slate-800/50 text-slate-400'}`}>
+                <QrCode className="h-5 w-5 md:h-6 md:w-6" />
               </div>
-              <div>
-                <h4 className="text-base font-extrabold text-slate-100">Factura Electrónica</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Reporte oficial DIAN con datos fiscales</p>
+              <div className="min-w-0">
+                <h4 className="text-sm md:text-base font-extrabold text-slate-100 truncate">Factura Electrónica</h4>
+                <p className="text-[10px] md:text-xs text-slate-400 mt-0.5 truncate max-w-[160px] sm:max-w-none">Reporte oficial DIAN con datos fiscales</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+            <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0 ml-2 hidden sm:block">
               F2
             </span>
           </button>

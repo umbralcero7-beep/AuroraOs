@@ -151,7 +151,7 @@ export default function SecuritySupportModule({
             <div className="flex justify-between items-center relative z-10 mb-4">
               <div>
                 <span className="text-[10px] font-mono text-red-400 bg-red-500/10 px-2 py-0.5 border border-red-500/20 rounded font-bold uppercase tracking-wider">
-                  AURORA SHIELD ACTIVADO v4.5
+                  AURORA SHIELD ACTIVADO
                 </span>
                 <h3 className="text-xl font-bold text-white mt-1.5 font-sans flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-emerald-400" />
@@ -164,7 +164,7 @@ export default function SecuritySupportModule({
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed font-sans max-w-3xl relative z-10">
-              Aurora OS intercepta y sanitiza de forma automática todos los ataques comunes de red. Nuestro firmware valida consultas SQL para evitar inyecciones maliciosas de bases de datos, sanitiza parámetros para detener ataques de Cross-Site Scripting (XSS), y activa Rate Limiting tras 5 intentos fallidos de contraseñas.
+              Aurora intercepta y sanitiza de forma automática todos los ataques comunes de red. Nuestro firmware valida consultas SQL para evitar inyecciones maliciosas de bases de datos, sanitiza parámetros para detener ataques de Cross-Site Scripting (XSS), y activa Rate Limiting tras 5 intentos fallidos de contraseñas.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 relative z-10">
@@ -230,7 +230,7 @@ export default function SecuritySupportModule({
                   REGISTRAR EN LISTA BLANCA
                 </h3>
                 <p className="text-slate-400 mt-1 leading-relaxed">
-                  Solo los correos electrónicos registrados en esta lista blanca podrán crear un perfil de acceso a Aurora OS.
+                  Solo los correos electrónicos registrados en esta lista blanca podrán crear un perfil de acceso a Aurora.
                 </p>
               </div>
 

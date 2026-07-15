@@ -1,4 +1,4 @@
-// Aurora OS - PWA Service Worker
+// Aurora - PWA Service Worker
 const CACHE_NAME = 'auroraos-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
@@ -76,7 +76,7 @@ self.addEventListener('fetch', (event) => {
           const cachedIndex = await cache.match('/index.html');
           if (cachedIndex) return cachedIndex;
         }
-        return new Response('Conexión perdida. Aurora OS requiere internet para sincronizar datos.', {
+        return new Response('Conexión perdida. Aurora requiere internet para sincronizar datos.', {
           status: 503,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' }
         });

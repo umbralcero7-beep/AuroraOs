@@ -30,6 +30,7 @@ import HrModule from './components/HrModule';
 import SecuritySupportModule from './components/SecuritySupportModule';
 import AiAssistantModule from './components/AiAssistantModule';
 import GoogleWorkspaceModule from './components/GoogleWorkspaceModule';
+import RouteGuard from './components/RouteGuard';
 import PwaInstallModal from './components/PwaInstallModal';
 
 import { 
@@ -84,6 +85,9 @@ export default function App() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [activeToasts, setActiveToasts] = useState<AppNotification[]>([]);
+  
+  // Track alerted insumos to prevent email spam
+  const alertedInsumosRef = React.useRef<Set<string>>(new Set());
 
   // Periodically check for urgent/overdue orders and low stock
   useEffect(() => {
@@ -103,6 +107,21 @@ export default function App() {
           read: false,
           meta: { insumoId: ins.id, supplierId: ins.supplierId }
         });
+
+        // Fire automated email alert for critical inventory to umbralcero7@gmail.com
+        if (!alertedInsumosRef.current.has(ins.id)) {
+          alertedInsumosRef.current.add(ins.id);
+          triggerAction('SEND_EMAIL_ALERT', {
+            to: 'umbralcero7@gmail.com',
+            subject: `⚠️ ALERTA CRÍTICA INVENTARIO - Aurora: ${ins.name}`,
+            body: `Se ha detectado un nivel de stock crítico en la sede activa.\n\nInsumo: ${ins.name}\nStock Actual: ${ins.stock} ${ins.unit}\nMínimo Permitido: ${ins.minStock} ${ins.unit}\n\nPor favor, contacte a los proveedores inmediatamente para reabastecimiento.`
+          }).catch(console.error);
+        }
+      } else {
+        // If stock is replenished, remove from the alerted set so it can trigger again in the future
+        if (alertedInsumosRef.current.has(ins.id)) {
+          alertedInsumosRef.current.delete(ins.id);
+        }
       }
     });
 
@@ -514,7 +533,8 @@ export default function App() {
         id: 'u1',
         name: 'Carlos Mendoza',
         email: 'admin@aurora.com',
-        role: 'ADMIN',
+        role: 'super_admin',
+        allowedModules: ['pos', 'reportes', 'comandas_waiter', 'cocina_kds', 'domicilios', 'inventario', 'contabilidad', 'rrhh', 'asistente', 'workspace', 'seguridad'],
         sedeId: 's1',
         active: true,
         twoFactorEnabled: true
@@ -549,9 +569,9 @@ export default function App() {
 
   if (loadingState) {
     return (
-      <div className="h-screen w-screen bg-[#09090b] flex flex-col items-center justify-center text-zinc-100 font-sans">
+      <div className="h-screen w-screen bg-[#030712] flex flex-col items-center justify-center text-zinc-100 font-sans">
         <RefreshCw className="h-10 w-10 text-blue-500 animate-spin mb-4" />
-        <p className="text-sm font-mono tracking-wider text-zinc-400">ESTABLECIENDO CANALES CIFRADOS AURORA OS...</p>
+        <p className="text-sm font-mono tracking-wider text-zinc-400">ESTABLECIENDO CANALES CIFRADOS AURORA...</p>
       </div>
     );
   }
@@ -559,7 +579,7 @@ export default function App() {
   // LOGIN SCREEN
   if (!currentUser) {
     return (
-      <div className="h-screen w-screen bg-[#09090b] flex items-center justify-center font-sans p-4 relative overflow-hidden">
+      <div className="h-screen w-screen bg-[#030712] flex items-center justify-center font-sans p-4 relative overflow-hidden">
         {/* Abstract background vector line decoration */}
         <div className="absolute top-0 right-0 h-96 w-96 bg-blue-500/5 rounded-full filter blur-3xl"></div>
         <div className="absolute bottom-0 left-0 h-96 w-96 bg-red-500/5 rounded-full filter blur-3xl"></div>
@@ -568,7 +588,7 @@ export default function App() {
           
           <div className="text-center space-y-2">
             <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-md uppercase tracking-wider font-bold">
-              AURORA OS RESTAURANT v4.5
+              AURORA RESTAURANT
             </span>
             <h1 className="text-xl font-bold font-sans text-white mt-3 tracking-tight">CONTROL DE ACCESO SEGURO</h1>
             <p className="text-xs text-zinc-400 font-mono">Bases de Datos de Múltiples Sucursales Blindadas</p>
@@ -690,7 +710,7 @@ export default function App() {
 
   // ACTIVE MAIN APPLICATION LAYOUT
   return (
-    <div className="h-screen w-screen bg-[#09090b] flex overflow-hidden font-sans select-none text-[#fafafa]">
+    <div className="h-screen w-screen bg-[#030712] flex overflow-hidden font-sans select-none text-[#fafafa]">
       
       {/* Sidebar Navigation */}
       <Navigation 
@@ -712,7 +732,7 @@ export default function App() {
         
         {/* Main top header */}
         <header className="h-14 bg-zinc-900/20 border-b border-zinc-800 px-4 md:px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsMobileSidebarOpen(true)}
               className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white lg:hidden cursor-pointer flex items-center justify-center mr-1"
@@ -720,11 +740,18 @@ export default function App() {
             >
               <Menu className="h-4.5 w-4.5" />
             </button>
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
-              <Store className="h-4 w-4 text-blue-500" />
-              <span className="hidden sm:inline">Sucursal Activa:</span>
-              <span className="text-zinc-200 font-bold">{sedes.find(s => s.id === activeSedeId)?.name || 'N/A'}</span>
+
+            <div className="flex items-center gap-2">
+              <span className={`rounded-full h-2 w-2 ${isConnected ? 'bg-emerald-500 animate-ping' : 'bg-red-500 animate-ping'}`}></span>
+              <span className="text-xs text-slate-300 font-mono hidden sm:inline">
+                {isConnected ? 'ONLINE' : 'OFFLINE'}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1.5 text-xs text-slate-300 font-mono">
+              <Store className="h-4 w-4 text-emerald-400" />
+              <span className="hidden sm:inline">Sucursal:</span>
+              <span className="text-white font-bold">{sedes.find(s => s.id === activeSedeId)?.name || 'N/A'}</span>
             </div>
           </div>
 
@@ -746,11 +773,11 @@ export default function App() {
               <button 
                 onClick={() => setIsNotifOpen(!isNotifOpen)}
                 className="p-1.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-805 hover:border-zinc-750 text-zinc-300 hover:text-[#06B6D4] rounded-lg transition-colors cursor-pointer flex items-center justify-center relative"
-                title="Notificaciones push de Aurora OS"
+                title="Notificaciones push de Aurora"
               >
                 <Bell className="h-4 w-4" />
                 {notifications.some(n => !n.read) && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-[#09090b] animate-bounce">
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-[#030712] animate-bounce">
                     {notifications.filter(n => !n.read).length}
                   </span>
                 )}
@@ -893,7 +920,7 @@ export default function App() {
               <button 
                 onClick={handleLogout}
                 className="p-1.5 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"
-                title="Cerrar sesión de Aurora OS"
+                title="Cerrar sesión de Aurora"
               >
                 <LogOut className="h-3.5 w-3.5" />
               </button>
@@ -904,131 +931,153 @@ export default function App() {
         {/* Modules Content Routing Router */}
         <div className="flex-1 flex overflow-hidden">
           {activeTab === 'pos' && (
-            <PosModule 
-              sedeId={activeSedeId}
-              menuItems={menuItems}
-              currentUser={currentUser}
-              onTriggerAction={triggerAction}
-              invoices={invoices}
-              cierreCajas={cierres}
-              comandas={comandas}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="pos" requiredRoles={['super_admin', 'admin', 'cashier']} onLogout={handleLogout}>
+              <PosModule 
+                sedeId={activeSedeId}
+                menuItems={menuItems}
+                currentUser={currentUser}
+                onTriggerAction={triggerAction}
+                invoices={invoices}
+                cierreCajas={cierres}
+                comandas={comandas}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'reportes' && (
-            <ReportModule 
-              sedeId={activeSedeId}
-              invoices={invoices}
-              gastos={gastos}
-              cierres={cierres}
-              menuItems={menuItems}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="reportes" requiredRoles={['super_admin', 'admin']} onLogout={handleLogout}>
+              <ReportModule 
+                sedeId={activeSedeId}
+                invoices={invoices}
+                gastos={gastos}
+                cierres={cierres}
+                menuItems={menuItems}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'contabilidad' && (
-            <AccountingModule 
-              sedeId={activeSedeId}
-              gastos={gastos}
-              invoices={invoices}
-              cushion={cushion || { id: 'c1', retainedEarnings: 23500000, cushionTarget: 80000000, cushionHistory: [] }}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="contabilidad" requiredRoles={['super_admin', 'admin']} onLogout={handleLogout}>
+              <AccountingModule 
+                sedeId={activeSedeId}
+                gastos={gastos}
+                invoices={invoices}
+                cushion={cushion || { id: 'c1', retainedEarnings: 23500000, cushionTarget: 80000000, cushionHistory: [], activeBufferAmount: 0 }}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'inventario' && (
-            <InventoryModule 
-              sedeId={activeSedeId}
-              insumos={insumos}
-              menuItems={menuItems}
-              suppliers={[
-                { id: 'sup1', name: 'Distribuidora Carnes del Valle', phone: '+57 4 311 0000', email: 'ventas@vallecarnes.com', category: 'Carnes' },
-                { id: 'sup2', name: 'Lácteos Antofagasta S.A.', phone: '+57 4 312 0000', email: 'lacteos@antofagasta.co', category: 'Lácteos' },
-                { id: 'sup3', name: 'Frubana Colombia SAS', phone: '+57 1 450 0000', email: 'soporte@frubana.com', category: 'Verduras' }
-              ]}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="inventario" requiredRoles={['super_admin', 'admin']} onLogout={handleLogout}>
+              <InventoryModule 
+                sedeId={activeSedeId}
+                insumos={insumos}
+                menuItems={menuItems}
+                suppliers={[
+                  { id: 'sup1', name: 'Distribuidora Carnes del Valle', phone: '+57 4 311 0000', email: 'ventas@vallecarnes.com', category: 'Carnes' },
+                  { id: 'sup2', name: 'Lácteos Antofagasta S.A.', phone: '+57 4 312 0000', email: 'lacteos@antofagasta.co', category: 'Lácteos' },
+                  { id: 'sup3', name: 'Frubana Colombia SAS', phone: '+57 1 450 0000', email: 'soporte@frubana.com', category: 'Verduras' }
+                ]}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'comandas_waiter' && (
-            <WaiterModule 
-              sedeId={activeSedeId}
-              comandas={comandas}
-              menuItems={menuItems}
-              currentUser={currentUser}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="comandas_waiter" requiredRoles={['super_admin', 'admin', 'waiter']} onLogout={handleLogout}>
+              <WaiterModule 
+                sedeId={activeSedeId}
+                comandas={comandas}
+                menuItems={menuItems}
+                currentUser={currentUser}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'cocina_kds' && (
-            <KitchenModule 
-              sedeId={activeSedeId}
-              comandas={comandas}
-              menuItems={menuItems}
-              currentUser={currentUser}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="cocina_kds" requiredRoles={['super_admin', 'admin', 'kitchen']} onLogout={handleLogout}>
+              <KitchenModule 
+                sedeId={activeSedeId}
+                comandas={comandas}
+                menuItems={menuItems}
+                currentUser={currentUser}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'domicilios' && (
-            <DeliveryModule 
-              sedeId={activeSedeId}
-              domicilios={domicilios}
-              menuItems={menuItems}
-              currentUser={currentUser}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="domicilios" requiredRoles={['super_admin', 'admin', 'cashier', 'waiter']} onLogout={handleLogout}>
+              <DeliveryModule 
+                sedeId={activeSedeId}
+                domicilios={domicilios}
+                menuItems={menuItems}
+                currentUser={currentUser}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'rrhh' && (
-            <HrModule 
-              sedeId={activeSedeId}
-              hrColaboradores={hrColaboradores}
-              waiterBitacoras={waiterBitacoras}
-              currentUser={currentUser}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="rrhh" requiredRoles={['super_admin', 'admin']} onLogout={handleLogout}>
+              <HrModule 
+                sedeId={activeSedeId}
+                hrColaboradores={hrColaboradores}
+                waiterBitacoras={waiterBitacoras}
+                currentUser={currentUser}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'seguridad' && (
-            <SecuritySupportModule 
-              sedes={sedes}
-              whitelistedUsers={whitelistedUsers}
-              securityLogs={securityLogs}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="seguridad" requiredRoles={['super_admin']} onLogout={handleLogout}>
+              <SecuritySupportModule 
+                sedes={sedes}
+                whitelistedUsers={whitelistedUsers}
+                securityLogs={securityLogs}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'asistente' && (
-            <AiAssistantModule 
-              sedeId={activeSedeId}
-              currentUser={currentUser}
-              insumos={insumos}
-              invoices={invoices}
-              securityLogs={securityLogs}
-              onTriggerAction={triggerAction}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="asistente" requiredRoles={['super_admin', 'admin']} onLogout={handleLogout}>
+              <AiAssistantModule 
+                sedeId={activeSedeId}
+                currentUser={currentUser}
+                insumos={insumos}
+                invoices={invoices}
+                securityLogs={securityLogs}
+                onTriggerAction={triggerAction}
+              />
+            </RouteGuard>
           )}
 
           {activeTab === 'workspace' && (
-            <GoogleWorkspaceModule 
-              sedeId={activeSedeId}
-              invoices={invoices}
-              insumos={insumos}
-              menuItems={menuItems}
-              currentUser={currentUser}
-              gastos={gastos}
-              onTriggerAction={triggerAction}
-              refreshData={fetchState}
-            />
+            <RouteGuard currentUser={currentUser} moduleKey="workspace" requiredRoles={['super_admin', 'admin']} onLogout={handleLogout}>
+              <GoogleWorkspaceModule 
+                sedeId={activeSedeId}
+                invoices={invoices}
+                insumos={insumos}
+                menuItems={menuItems}
+                currentUser={currentUser}
+                gastos={gastos}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
           )}
         </div>
 

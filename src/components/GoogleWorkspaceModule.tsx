@@ -156,7 +156,7 @@ export default function GoogleWorkspaceModule({
         setAccessToken(res.accessToken);
         setNeedsAuth(false);
         await loadModuleData(res.accessToken);
-        setSuccessMessage('¡Cuenta de Google vinculada con éxito en Aurora OS!');
+        setSuccessMessage('¡Cuenta de Google vinculada con éxito en Aurora!');
       }
     } catch (err: any) {
       console.error(err);
@@ -167,7 +167,7 @@ export default function GoogleWorkspaceModule({
   };
 
   const handleSignOut = async () => {
-    if (window.confirm('¿Desvincular tu cuenta de Google de Aurora OS?')) {
+    if (window.confirm('¿Desvincular tu cuenta de Google de Aurora?')) {
       await logout();
       setUser(null);
       setAccessToken(null);
@@ -212,7 +212,7 @@ export default function GoogleWorkspaceModule({
 
       const body = {
         summary: newCalEvent.summary,
-        description: newCalEvent.description || 'Creado automáticamente desde Aurora OS - Restaurant Management',
+        description: newCalEvent.description || 'Creado automáticamente desde Aurora - Restaurant Management',
         start: {
           dateTime: startDateTime,
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -325,12 +325,12 @@ export default function GoogleWorkspaceModule({
         `from: ${fromEmail}\r\n`,
         `subject: =?UTF-8?B?${btoa(unescape(encodeURIComponent(newEmail.subject)))}?=\r\n\r\n`,
         `<div style="font-family: sans-serif; padding: 20px; background-color: #0f172a; color: #f1f5f9; border-radius: 12px; border: 1px solid #334155;">
-          <h2 style="color: #06b6d4; margin-top: 0; font-size: 20px; border-b: 1px solid #1e293b; padding-bottom: 10px;">Aurora OS - Restaurant Intelligence</h2>
+          <h2 style="color: #06b6d4; margin-top: 0; font-size: 20px; border-b: 1px solid #1e293b; padding-bottom: 10px;">Aurora - Restaurant Intelligence</h2>
           <div style="font-size: 14px; line-height: 1.6; margin-top: 15px;">
             ${newEmail.body.replace(/\n/g, '<br />')}
           </div>
           <p style="font-size: 11px; color: #64748b; margin-top: 30px; border-t: 1px solid #1e293b; padding-top: 10px; font-family: monospace;">
-            Correo enviado de forma automatizada por el módulo de vinculación en la nube de Aurora OS.
+            Correo enviado de forma automatizada por el módulo de vinculación en la nube de Aurora.
           </p>
          </div>`
       ].join("");
@@ -376,7 +376,7 @@ export default function GoogleWorkspaceModule({
       let rows: any[][] = [];
 
       if (type === 'invoices') {
-        sheetTitle = `Reporte de Facturación Aurora OS (${new Date().toLocaleDateString()})`;
+        sheetTitle = `Reporte de Facturación Aurora (${new Date().toLocaleDateString()})`;
         headers = ['ID Factura', 'Nro Factura', 'Cliente', 'Documento', 'Total (COP)', 'Método Pago', 'Fecha'];
         rows = invoices.map(inv => [
           inv.id,
@@ -388,7 +388,7 @@ export default function GoogleWorkspaceModule({
           new Date(inv.timestamp || Date.now()).toLocaleDateString()
         ]);
       } else if (type === 'inventory') {
-        sheetTitle = `Insumos & Stock Crítico Aurora OS (${new Date().toLocaleDateString()})`;
+        sheetTitle = `Insumos & Stock Crítico Aurora (${new Date().toLocaleDateString()})`;
         headers = ['ID Insumo', 'Nombre', 'SKU / Código', 'Categoría', 'Stock Actual', 'Mínimo Crítico', 'Unidad Medida', 'Estado Stock'];
         rows = insumos.map(ins => {
           const state = ins.stock <= ins.minStock ? 'CRÍTICO' : 'OK';
@@ -404,7 +404,7 @@ export default function GoogleWorkspaceModule({
           ];
         });
       } else {
-        sheetTitle = `Menú Activo de Platos - Aurora OS (${new Date().toLocaleDateString()})`;
+        sheetTitle = `Menú Activo de Platos - Aurora (${new Date().toLocaleDateString()})`;
         headers = ['ID Plato', 'Nombre Plato', 'Categoría', 'Precio Venta (COP)', 'Descripción', 'Disponible'];
         rows = menuItems.map(m => [
           m.id,
@@ -484,7 +484,7 @@ export default function GoogleWorkspaceModule({
     setSuccessMessage('');
 
     try {
-      const sheetTitle = `Cuadro de Mando Financiero ERP - Aurora OS (${new Date().toLocaleDateString()})`;
+      const sheetTitle = `Cuadro de Mando Financiero ERP - Aurora (${new Date().toLocaleDateString()})`;
       
       // Step 1: Create a Google Spreadsheet with 4 Sheets (pestañas)
       const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
@@ -525,7 +525,7 @@ export default function GoogleWorkspaceModule({
       const activeMenuItemsCount = menuItems.filter(m => m.sedeId === sedeId).length;
 
       const summaryValues = [
-        ["CUADRO DE MANDO FINANCIERO ERP - AURORA OS", ""],
+        ["CUADRO DE MANDO FINANCIERO ERP - AURORA", ""],
         ["Reporte Consolidado de Operación e Inteligencia Financiera", ""],
         ["", ""],
         ["INFORMACIÓN DEL REPORTE", ""],
@@ -634,7 +634,7 @@ export default function GoogleWorkspaceModule({
             Integración Oficial de Google Cloud
           </div>
           <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            Nube Aurora OS <span className="text-zinc-500 font-normal">| G-Workspace</span>
+            Nube Aurora <span className="text-zinc-500 font-normal">| G-Workspace</span>
           </h2>
           <p className="text-xs text-zinc-400 font-mono mt-1">
             Conexión en vivo con tus cuentas corporativas de Google Sheets, Calendar y Gmail.
@@ -716,7 +716,7 @@ export default function GoogleWorkspaceModule({
           </div>
           <h3 className="text-lg font-black text-white">Sincronización Cloud Requerida</h3>
           <p className="text-xs text-zinc-400 leading-relaxed max-w-md mt-2 mb-6">
-            Para habilitar el volcado de ventas diarias en Google Sheets, agendar reservas de mesa automáticamente en Google Calendar, y enviar recibos y correos mediante Gmail, debes autorizar el enlace en la nube de Aurora OS.
+            Para habilitar el volcado de ventas diarias en Google Sheets, agendar reservas de mesa automáticamente en Google Calendar, y enviar recibos y correos mediante Gmail, debes autorizar el enlace en la nube de Aurora.
           </p>
           <button
             onClick={handleSignIn}
@@ -816,7 +816,7 @@ export default function GoogleWorkspaceModule({
                             </div>
                             <div className="flex-1 min-w-0 leading-normal">
                               <span className="text-xs font-bold text-zinc-200 block truncate">{event.summary}</span>
-                              <p className="text-[10px] text-zinc-400 truncate mt-0.5">{event.description || 'Creado vía Aurora OS'}</p>
+                              <p className="text-[10px] text-zinc-400 truncate mt-0.5">{event.description || 'Creado vía Aurora'}</p>
                               <div className="text-[9px] font-mono text-[#06B6D4] mt-1">
                                 {start ? start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Todo el día'}
                               </div>
@@ -1008,8 +1008,8 @@ export default function GoogleWorkspaceModule({
                           onClick={() => setNewEmail({ 
                             ...newEmail, 
                             to: 'ventas@vallecarnes.com', 
-                            subject: 'Solicitud de Reabastecimiento - Aurora OS',
-                            body: 'Estimados Señores,\n\nEscribimos para solicitar cotización y envío de los siguientes insumos de carne críticos para nuestro restaurante...\n\nAtentamente,\nEquipo de Cocina Aurora OS'
+                            subject: 'Solicitud de Reabastecimiento - Aurora',
+                            body: 'Estimados Señores,\n\nEscribimos para solicitar cotización y envío de los siguientes insumos de carne críticos para nuestro restaurante...\n\nAtentamente,\nEquipo de Cocina Aurora'
                           })}
                           className="px-1.5 py-0.5 bg-zinc-900 border border-zinc-850 text-[8px] font-mono text-zinc-400 hover:text-white rounded cursor-pointer shrink-0"
                         >
@@ -1020,12 +1020,12 @@ export default function GoogleWorkspaceModule({
                           onClick={() => {
                             const lastInvoice = invoices[0];
                             const defaultBody = lastInvoice 
-                              ? `Hola ${lastInvoice.customerName},\n\nAdjuntamos los detalles de tu compra en Aurora OS.\nTotal Facturado: $${lastInvoice.total.toLocaleString()} COP.\nFactura Nro: ${lastInvoice.invoiceNumber}.\n\n¡Gracias por tu visita!`
-                              : `Hola,\n\nTe enviamos los detalles de tu compra en Aurora OS.\n\n¡Gracias por preferirnos!`;
+                              ? `Hola ${lastInvoice.customerName},\n\nAdjuntamos los detalles de tu compra en Aurora.\nTotal Facturado: $${lastInvoice.total.toLocaleString()} COP.\nFactura Nro: ${lastInvoice.invoiceNumber}.\n\n¡Gracias por tu visita!`
+                              : `Hola,\n\nTe enviamos los detalles de tu compra en Aurora.\n\n¡Gracias por preferirnos!`;
                             setNewEmail({ 
                               ...newEmail, 
                               to: 'cliente@correo.com', 
-                              subject: `Factura Digital ${lastInvoice?.invoiceNumber || ''} - Aurora OS`,
+                              subject: `Factura Digital ${lastInvoice?.invoiceNumber || ''} - Aurora`,
                               body: defaultBody
                             });
                           }}

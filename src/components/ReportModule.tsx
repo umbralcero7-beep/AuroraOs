@@ -194,7 +194,7 @@ export default function ReportModule({
           productConsolidation[trimmedName].qty += item.qty;
           productConsolidation[trimmedName].total += item.subtotal;
           
-          const nameLower = trimmedName.toLowerCase();
+          const nameLower = trimmedName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
           if (
             nameLower.includes('1/4') || 
             nameLower.includes('cuarto') || 
@@ -472,7 +472,7 @@ export default function ReportModule({
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>${title} - Aurora OS</title>
+        <title>${title} - Aurora</title>
         <style>
           body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -605,7 +605,7 @@ export default function ReportModule({
         </div>
 
         <div class="footer">
-          Este documento es un reporte contable oficial exportado de Aurora OS.<br>
+          Este documento es un reporte contable oficial exportado de Aurora.<br>
           Generado de manera segura. Todos los datos están encriptados y sincronizados con los entes reguladores de auditoría fiscal nacional.
         </div>
 
@@ -638,7 +638,7 @@ export default function ReportModule({
 
     filteredInvoices.forEach(inv => {
       inv.items.forEach(item => {
-        const nameLower = item.name.toLowerCase();
+        const nameLower = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         
         // Quarter chicken checks
         if (
@@ -702,7 +702,7 @@ export default function ReportModule({
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Control de Inventario de Pollos - Aurora OS</title>
+        <title>Control de Inventario de Pollos - Aurora</title>
         <style>
           body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -915,8 +915,8 @@ export default function ReportModule({
         </div>
 
         <div class="footer">
-          Este reporte es un instrumento de control de inventarios interno generado en tiempo real por Aurora OS.<br>
-          © 2026 Aurora OS. Reservados todos los derechos. Sede ID: ${sedeId.toUpperCase()}
+          Este reporte es un instrumento de control de inventarios interno generado en tiempo real por Aurora.<br>
+          © 2026 Aurora. Reservados todos los derechos. Sede ID: ${sedeId.toUpperCase()}
         </div>
 
         <script>
@@ -945,7 +945,7 @@ export default function ReportModule({
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Manual Técnico y de Operaciones - Aurora OS v4.5</title>
+        <title>Manual Técnico y de Operaciones - Aurora</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
           
@@ -1162,7 +1162,7 @@ export default function ReportModule({
         <div class="cover">
           <div class="cover-header">
             <div class="cover-logo">AURORA <span style="font-weight:300; color:#475569;">OS</span></div>
-            <div class="cover-version">SISTEMA v4.5</div>
+            <div class="cover-version">SISTEMA</div>
           </div>
           <div class="cover-body">
             <div class="cover-title">Manual de Usuario y Operaciones</div>
@@ -1177,7 +1177,7 @@ export default function ReportModule({
         <!-- TABLE OF CONTENTS -->
         <h1>Tabla de Contenidos</h1>
         <ol style="font-size: 13px; line-height: 2.0; color: #1e293b; font-weight: 500; padding-left: 25px;">
-          <li>Introducción y Arquitectura de Aurora OS</li>
+          <li>Introducción y Arquitectura de Aurora</li>
           <li>Módulo de POS & Control de Caja Registradora</li>
           <li>Control de Porciones del Asador y Auditoría de Inventarios de Pollo</li>
           <li>Módulo de Comandas & Mesas (Waiter)</li>
@@ -1191,9 +1191,9 @@ export default function ReportModule({
         </ol>
         
         <!-- SECTION 1 -->
-        <h1>1. Introducción y Arquitectura de Aurora OS</h1>
+        <h1>1. Introducción y Arquitectura de Aurora</h1>
         <p>
-          <strong>Aurora OS v4.5</strong> es un sistema operativo y plataforma ERP de vanguardia diseñada específicamente para la administración de restaurantes, asadores y negocios gastronómicos con flujos de alta densidad transaccional. La arquitectura del sistema se fundamenta en un modelo <strong>multisede unificado</strong> que permite sincronizar múltiples sucursales físicas en tiempo real desde una base de datos centralizada en la nube.
+          <strong>Aurora</strong> es un sistema operativo y plataforma ERP de vanguardia diseñada específicamente para la administración de restaurantes, asadores y negocios gastronómicos con flujos de alta densidad transaccional. La arquitectura del sistema se fundamenta en un modelo <strong>multisede unificado</strong> que permite sincronizar múltiples sucursales físicas en tiempo real desde una base de datos centralizada en la nube.
         </p>
         <p>
           La interfaz de usuario ha sido optimizada para operación táctil y de escritorio, implementando un diseño de alta legibilidad, respuesta instantánea en microsegundos y arquitectura <strong>PWA (Progressive Web App)</strong>, lo cual asegura que el sistema pueda operar sin contratiempos incluso en situaciones de inestabilidad de red o desconexión a internet local.
@@ -1210,7 +1210,7 @@ export default function ReportModule({
         </p>
         <h2>Facturación con Cumplimiento Legal (Resoluciones DIAN)</h2>
         <p>
-          Las facturas emitidas por Aurora OS incorporan automáticamente los parámetros fiscales vigentes, incluyendo:
+          Las facturas emitidas por Aurora incorporan automáticamente los parámetros fiscales vigentes, incluyendo:
         </p>
         <ul>
           <li><strong>Prefijo de Facturación y Consecutivo Autoincremental:</strong> Configurado dinámicamente según la sede activa.</li>
@@ -1225,7 +1225,7 @@ export default function ReportModule({
         <!-- SECTION 3 -->
         <h1>3. Control de Porciones del Asador y Auditoría de Inventarios de Pollo</h1>
         <p>
-          Debido a la alta merma y la criticidad de la materia prima en los restaurantes de asador de pollos, Aurora OS incorpora un <strong>algoritmo propietario de auditoría matemática de porciones</strong>. Este sistema contrarresta de manera automática la fuga de inventario en cocina.
+          Debido a la alta merma y la criticidad de la materia prima en los restaurantes de asador de pollos, Aurora incorpora un <strong>algoritmo propietario de auditoría matemática de porciones</strong>. Este sistema contrarresta de manera automática la fuga de inventario en cocina.
         </p>
         
         <div class="note-box">
@@ -1320,7 +1320,7 @@ export default function ReportModule({
         <!-- SECTION 6 -->
         <h1>6. Inventario General ERP, Recetas y Alertas Críticas</h1>
         <p>
-          La gestión de materias primas en Aurora OS es completamente automatizada y cuenta con un sistema de <strong>descuento dinámico de stock por receta</strong>. Cuando un cajero vende un plato en el POS, el software descuenta de forma automática las porciones exactas de los insumos asociados en la base de datos (ej: papas, salsas, empaques, pollos enteros).
+          La gestión de materias primas en Aurora es completamente automatizada y cuenta con un sistema de <strong>descuento dinámico de stock por receta</strong>. Cuando un cajero vende un plato en el POS, el software descuenta de forma automática las porciones exactas de los insumos asociados en la base de datos (ej: papas, salsas, empaques, pollos enteros).
         </p>
         <h2>Configuración de Stock Mínimo y Alertas de Reabastecimiento</h2>
         <p>
@@ -1335,7 +1335,7 @@ export default function ReportModule({
         <!-- SECTION 7 -->
         <h1>7. Módulo Contable, Control de Gastos y Flujo de Colchón</h1>
         <p>
-          Aurora OS automatiza el seguimiento de la rentabilidad del restaurante, permitiendo registrar todos los <strong>gastos y egresos operativos</strong> y cruzarlos contra la facturación bruta.
+          Aurora automatiza el seguimiento de la rentabilidad del restaurante, permitiendo registrar todos los <strong>gastos y egresos operativos</strong> y cruzarlos contra la facturación bruta.
         </p>
         <h2>Registro de Gastos</h2>
         <p>
@@ -1343,7 +1343,7 @@ export default function ReportModule({
         </p>
         <h2>El Colchón Financiero (Amortiguación de Riesgo de Caja)</h2>
         <p>
-          Una de las herramientas contables exclusivas de Aurora OS es la métrica de <strong>Colchón Financiero</strong>. El sistema calcula los gastos fijos históricos y determina cuántos días de operación continua puede soportar la sede activa con el saldo neto de caja acumulado, sirviendo como una alarma de salud financiera temprana contra déficit operacionales.
+          Una de las herramientas contables exclusivas de Aurora es la métrica de <strong>Colchón Financiero</strong>. El sistema calcula los gastos fijos históricos y determina cuántos días de operación continua puede soportar la sede activa con el saldo neto de caja acumulado, sirviendo como una alarma de salud financiera temprana contra déficit operacionales.
         </p>
 
         <!-- SECTION 8 -->
@@ -1359,7 +1359,7 @@ export default function ReportModule({
         <!-- SECTION 9 -->
         <h1>9. Asistente Inteligente con IA (Cero AI)</h1>
         <p>
-          Aurora OS incorpora un modelo inteligente de asistencia denominado <strong>Asistente Cero</strong>. Impulsado por algoritmos avanzados y Gemini API, este asistente procesa consultas complejas en lenguaje natural para proporcionar respuestas predictivas del negocio.
+          Aurora incorpora un modelo inteligente de asistencia denominado <strong>Asistente Cero</strong>. Impulsado por algoritmos avanzados y Gemini API, este asistente procesa consultas complejas en lenguaje natural para proporcionar respuestas predictivas del negocio.
         </p>
         <h2>Funcionalidades de Cero AI</h2>
         <ul>
@@ -1387,7 +1387,7 @@ export default function ReportModule({
         <!-- SECTION 11 -->
         <h1>11. Módulo de Ciberseguridad, Whitelisting de Terminales y Soporte</h1>
         <p>
-          Para salvaguardar la integridad de la base de datos contra accesos no autorizados o fraudes internos de empleados, Aurora OS integra un protocolo estricto de <strong>Seguridad Operativa</strong>.
+          Para salvaguardar la integridad de la base de datos contra accesos no autorizados o fraudes internos de empleados, Aurora integra un protocolo estricto de <strong>Seguridad Operativa</strong>.
         </p>
         <h2>Control de Acceso mediante Whitelisting</h2>
         <p>
@@ -1402,16 +1402,16 @@ export default function ReportModule({
         <div class="signature-section">
           <div class="signature-block">
             Director General de Operaciones
-            <div style="font-size: 9px; font-weight: normal; color: #64748b; margin-top: 5px;">Aurora OS Authorized Signatory</div>
+            <div style="font-size: 9px; font-weight: normal; color: #64748b; margin-top: 5px;">Aurora Authorized Signatory</div>
           </div>
           <div class="signature-block">
             Gerente de Auditoría & Control
-            <div style="font-size: 9px; font-weight: normal; color: #64748b; margin-top: 5px;">Aurora OS Security Supervisor</div>
+            <div style="font-size: 9px; font-weight: normal; color: #64748b; margin-top: 5px;">Aurora Security Supervisor</div>
           </div>
         </div>
 
         <div class="page-footer">
-          Manual de Operaciones y Referencia del Sistema Aurora OS v4.5.<br>
+          Manual de Operaciones y Referencia del Sistema Aurora.<br>
           © 2026 Aurora Software Inc. Todos los datos han sido estructurados para control de calidad interna del restaurante.
         </div>
 
@@ -1661,7 +1661,7 @@ export default function ReportModule({
               <div className="bg-slate-900/60 border border-blue-500/20 rounded-xl p-4 flex flex-col justify-between gap-3 hover:border-blue-500/40 transition-all shadow-md shadow-blue-500/[0.02]">
                 <div className="space-y-1">
                   <span className="inline-flex items-center gap-1 text-[8px] font-bold font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded uppercase tracking-widest border border-blue-500/20">
-                    Documentación OS
+                    Documentación
                   </span>
                   <h4 className="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider">Manual de Operaciones</h4>
                   <p className="text-[11px] text-slate-400 leading-relaxed font-mono">

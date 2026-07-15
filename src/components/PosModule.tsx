@@ -583,7 +583,7 @@ export default function PosModule({
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-[#0F172A] text-slate-100 font-sans">
       {/* UNIFIED NAVIGATION & ACTIONS BAR (Saves space, fully customized in Spanish) */}
-      <div className="bg-[#0D1425] border-b border-blue-900/30 p-2.5 shrink-0 relative z-30">
+      <div className="bg-[#0f172a] border-b border-blue-900/30 p-2.5 shrink-0 relative z-30">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 w-full max-w-7xl mx-auto">
           
           {/* Button 1: CUENTAS EN ESPERA */}
@@ -593,7 +593,7 @@ export default function PosModule({
                 setIsCuentasDropdownOpen(!isCuentasDropdownOpen);
                 setIsPosAdminDropdownOpen(false);
               }}
-              className="w-full bg-[#121A2E] hover:bg-[#1A2642] border border-blue-900/40 hover:border-blue-500/40 text-slate-100 font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md select-none"
+              className="w-full bg-[#1e293b] hover:bg-[#1A2642] border border-blue-900/40 hover:border-blue-500/40 text-slate-100 font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md select-none"
             >
               <Inbox className="h-4 w-4 text-blue-400" />
               <span>Cuentas en Espera</span>
@@ -608,7 +608,7 @@ export default function PosModule({
             {isCuentasDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsCuentasDropdownOpen(false)} />
-                <div className="absolute left-0 mt-2 w-80 bg-[#0D1425] border border-blue-900/40 rounded-2xl shadow-2xl p-3 z-50 flex flex-col gap-2 max-h-80 overflow-y-auto">
+                <div className="absolute left-0 mt-2 w-80 bg-[#0f172a] border border-blue-900/40 rounded-2xl shadow-2xl p-3 z-50 flex flex-col gap-2 max-h-80 overflow-y-auto">
                   <div className="text-[10px] uppercase font-mono text-slate-500 font-extrabold pb-2 border-b border-blue-950 tracking-wider">
                     📋 ORDENES ACTIVAS (MESAS EN SERVICIO)
                   </div>
@@ -625,7 +625,7 @@ export default function PosModule({
                           setPosSubView('POS');
                           setIsCuentasDropdownOpen(false);
                         }}
-                        className="w-full p-2 rounded-xl border border-blue-950 hover:border-blue-500 bg-[#121A2E]/60 hover:bg-[#121A2E] text-left transition-all flex items-center justify-between text-xs cursor-pointer group"
+                        className="w-full p-2 rounded-xl border border-blue-950 hover:border-blue-500 bg-[#1e293b]/60 hover:bg-[#1e293b] text-left transition-all flex items-center justify-between text-xs cursor-pointer group"
                       >
                         <div>
                           <div className="font-extrabold text-slate-200 group-hover:text-blue-400 transition-colors uppercase">
@@ -659,7 +659,7 @@ export default function PosModule({
               setIsCuentasDropdownOpen(false);
               setIsPosAdminDropdownOpen(false);
             }}
-            className="w-full bg-[#121A2E] hover:bg-[#1A2642] border border-blue-900/40 hover:border-blue-500/40 text-slate-100 font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md select-none"
+            className="w-full bg-[#1e293b] hover:bg-[#1A2642] border border-blue-900/40 hover:border-blue-500/40 text-slate-100 font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md select-none"
           >
             <Map className="h-4 w-4 text-blue-400" />
             <span>Mapeo de Mesas</span>
@@ -688,7 +688,7 @@ export default function PosModule({
                 setIsPosAdminDropdownOpen(!isPosAdminDropdownOpen);
                 setIsCuentasDropdownOpen(false);
               }}
-              className="w-full bg-[#121A2E] hover:bg-[#1A2642] border border-blue-900/40 hover:border-blue-500/40 text-slate-100 font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md select-none"
+              className="w-full bg-[#1e293b] hover:bg-[#1A2642] border border-blue-900/40 hover:border-blue-500/40 text-slate-100 font-extrabold text-xs uppercase tracking-wider py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md select-none"
             >
               <Settings className="h-4 w-4 text-blue-400" />
               <span>Administración POS</span>
@@ -698,7 +698,7 @@ export default function PosModule({
             {isPosAdminDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setIsPosAdminDropdownOpen(false)} />
-                <div className="absolute right-0 mt-2 w-64 bg-[#0D1425] border border-blue-900/40 rounded-2xl shadow-2xl p-2.5 z-50 flex flex-col gap-1">
+                <div className="absolute right-0 mt-2 w-64 bg-[#0f172a] border border-blue-900/40 rounded-2xl shadow-2xl p-2.5 z-50 flex flex-col gap-1">
                   <div className="text-[9px] uppercase font-mono text-slate-500 font-extrabold px-3 py-1.5 border-b border-blue-950 tracking-wider">
                     Menú de Administración
                   </div>
@@ -711,7 +711,7 @@ export default function PosModule({
                     className={`w-full p-2.5 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer ${
                       posSubView === 'POS'
                         ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 font-black'
-                        : 'hover:bg-[#121A2E] text-slate-300 border border-transparent'
+                        : 'hover:bg-[#1e293b] text-slate-300 border border-transparent'
                     }`}
                   >
                     <ShoppingCart className="h-4 w-4 text-blue-400" />
@@ -726,7 +726,7 @@ export default function PosModule({
                     className={`w-full p-2.5 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer ${
                       posSubView === 'INVOICES'
                         ? 'bg-[#06B6D4]/10 text-[#06B6D4] border border-[#06B6D4]/20 font-black'
-                        : 'hover:bg-[#121A2E] text-slate-300 border border-transparent'
+                        : 'hover:bg-[#1e293b] text-slate-300 border border-transparent'
                     }`}
                   >
                     <Receipt className="h-4 w-4 text-emerald-400" />
@@ -741,7 +741,7 @@ export default function PosModule({
                     className={`w-full p-2.5 rounded-xl text-left text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer ${
                       posSubView === 'CLOSURES'
                         ? 'bg-[#06B6D4]/10 text-[#06B6D4] border border-[#06B6D4]/20 font-black'
-                        : 'hover:bg-[#121A2E] text-slate-300 border border-transparent'
+                        : 'hover:bg-[#1e293b] text-slate-300 border border-transparent'
                     }`}
                   >
                     <FileText className="h-4 w-4 text-purple-400" />
@@ -771,7 +771,7 @@ export default function PosModule({
       </div>
 
       {posSubView === 'POS' && (
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#0A0F1D]">
+        <div className="flex-1 flex flex-col overflow-hidden bg-[#030712]">
           
           {/* MAIN COLUMN SPACE */}
           <div className="flex-1 flex overflow-hidden relative">
@@ -793,7 +793,7 @@ export default function PosModule({
                     placeholder="Buscar platillo..."
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
-                    className="w-full bg-[#121A2E] border border-blue-950 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-sans shadow-sm"
+                    className="w-full bg-[#1e293b] border border-blue-950 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-sans shadow-sm"
                   />
                   {productSearch && (
                     <button 
@@ -815,18 +815,20 @@ export default function PosModule({
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`w-full py-3 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider text-left transition-all border cursor-pointer ${
+                      className={`w-full py-3 px-3 rounded-full text-[10px] font-black uppercase tracking-wider text-left transition-all cursor-pointer ${
                         activeCategory === cat 
-                          ? 'bg-[#121A2E] text-blue-400 border-blue-500/80 shadow-md shadow-blue-500/5' 
-                          : 'bg-[#121A2E]/40 hover:bg-[#121A2E]/80 text-slate-400 border-transparent hover:text-slate-200'
+                          ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' 
+                          : 'bg-slate-800/40 text-slate-300 hover:bg-slate-800/60'
                       }`}
                     >
-                      {cat === 'ALL' && '🍔 TODOS'}
-                      {cat === 'ENTRADAS' && '🥗 ENTRADAS'}
-                      {cat === 'PLATOS_FUERTES' && '🥩 PLATOS FUERTES'}
-                      {cat === 'BEBIDAS' && '🥤 BEBIDAS'}
-                      {cat === 'POSTRES' && '🍰 POSTRES'}
-                      {cat === 'COMBOS' && '✨ COMBOS'}
+                      <span className="flex items-center gap-2">
+                        {cat === 'ALL' && '🍔 TODOS'}
+                        {cat === 'ENTRADAS' && '🥗 ENTRADAS'}
+                        {cat === 'PLATOS_FUERTES' && '🥩 PLATOS FUERTES'}
+                        {cat === 'BEBIDAS' && '🥤 BEBIDAS'}
+                        {cat === 'POSTRES' && '🍰 POSTRES'}
+                        {cat === 'COMBOS' && '✨ COMBOS'}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -834,26 +836,26 @@ export default function PosModule({
                 {/* Grid of Menu Items with beautiful visual photography */}
                 <div className="flex-1 overflow-y-auto pr-1">
                   {filteredItems.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-[#121A2E]/20 rounded-2xl border border-blue-950/40">
+                    <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-[#0f172a] rounded-2xl border border-[#1e293b]">
                       <ShoppingCart className="h-10 w-10 text-slate-600 mb-2 stroke-[1.5]" />
                       <h3 className="text-slate-300 font-bold text-xs">Sin platillos</h3>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                       {filteredItems.map((item) => (
                         <div 
                           key={item.id} 
                           onClick={() => item.available && addToCart(item)}
-                          className={`bg-[#0D1425] border border-blue-900/20 p-3 rounded-2xl flex flex-col justify-between cursor-pointer hover:border-blue-500 hover:shadow-xl hover:shadow-blue-950/20 transition-all relative group shadow-sm min-h-[170px] ${
+                          className={`bg-[#0f172a] rounded-2xl flex flex-col cursor-pointer border border-[#1e293b] hover:border-emerald-500/50 hover:shadow-xl hover:shadow-emerald-900/10 transition-all group overflow-hidden ${
                             !item.available ? 'opacity-40 cursor-not-allowed' : ''
                           }`}
                         >
                           {/* Image preview matching reference style */}
-                          <div className="h-24 w-full rounded-xl overflow-hidden bg-slate-900 relative shrink-0 mb-2">
+                          <div className="w-full aspect-video bg-slate-900 relative overflow-hidden shrink-0">
                             <img 
                               src={getProductImage(item.name, item.category)} 
                               alt={item.name} 
-                              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                               referrerPolicy="no-referrer"
                             />
                             {!item.available && (
@@ -863,23 +865,23 @@ export default function PosModule({
                             )}
                           </div>
 
-                          <div className="flex-1 flex flex-col justify-between">
+                          <div className="p-3 flex-1 flex flex-col justify-between">
                             <div>
-                              <h4 className="text-xs font-black text-slate-100 group-hover:text-blue-400 transition-colors truncate">
+                              <h4 className="text-sm font-bold text-slate-50 group-hover:text-emerald-400 transition-colors line-clamp-1">
                                 {item.name}
                               </h4>
                               <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                                {item.description || 'Delicioso platillo tradicional preparado fresco'}
+                                {item.description || 'Delicioso platillo preparado fresco'}
                               </p>
                             </div>
                             
-                            <div className="mt-2 pt-2 border-t border-blue-950/60 flex items-center justify-between">
-                              <span className="text-xs font-black font-mono text-emerald-400">
+                            <div className="mt-3 flex items-center justify-between">
+                              <span className="text-sm font-black font-mono text-emerald-400">
                                 ${item.price.toLocaleString()} COP
                               </span>
-                              <span className="h-6 w-6 rounded-lg bg-[#121A2E] border border-blue-950 flex items-center justify-center text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all text-xs font-black">
-                                +
-                              </span>
+                              <div className="h-7 w-7 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm">
+                                <span className="font-bold text-lg leading-none mb-0.5">+</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -893,7 +895,7 @@ export default function PosModule({
             </div>
 
             {/* RIGHT COMPARTMENT: DETALLE DE LA CUENTA (Elegant, High Contrast Sidebar - Always visible for All-In-One POS) */}
-            <div className="relative flex flex-col w-[350px] md:w-[420px] xl:w-[460px] h-full border-l border-blue-900/30 bg-[#0D1425] shrink-0 shadow-xl">
+            <div className="relative flex flex-col w-[350px] md:w-[420px] xl:w-[460px] h-full border-l border-blue-900/30 bg-[#0f172a] shrink-0 shadow-xl">
               
               <div className="p-4 border-b border-blue-950/60 bg-blue-950/10 flex flex-col gap-2 shrink-0">
                 <div className="flex items-center justify-between">
@@ -902,14 +904,14 @@ export default function PosModule({
                   </h3>
                   
                   <div className="flex items-center gap-1">
-                    <span className="bg-[#121A2E] text-blue-400 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono">
+                    <span className="bg-[#1e293b] text-blue-400 px-2 py-0.5 rounded-md text-[10px] font-bold font-mono">
                       {cart.reduce((sum, item) => sum + item.qty, 0)} items
                     </span>
                     
                     {cart.length > 0 && (
                       <button
                         onClick={() => setCart([])}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-[#121A2E] transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-[#1e293b] transition-colors cursor-pointer"
                         title="Vaciar comanda"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -919,7 +921,7 @@ export default function PosModule({
                 </div>
 
                 {/* Subtitle with active destination */}
-                <div className="flex items-center justify-between text-[10px] bg-[#121A2E]/40 px-2.5 py-1.5 rounded-lg border border-blue-950">
+                <div className="flex items-center justify-between text-[10px] bg-[#1e293b]/40 px-2.5 py-1.5 rounded-lg border border-blue-950">
                   <span className="text-slate-400 font-semibold">Mesa:</span>
                   <span className="font-mono font-black text-[#06B6D4]">{selectedTable}</span>
                 </div>
@@ -935,7 +937,7 @@ export default function PosModule({
                   </div>
                 ) : (
                   cart.map((cartItem) => (
-                    <div key={cartItem.item.id} className="bg-[#121A2E]/40 border border-blue-950/60 p-2 rounded-xl space-y-1 relative hover:border-blue-900 transition-all">
+                    <div key={cartItem.item.id} className="bg-[#1e293b]/40 border border-blue-950/60 p-2 rounded-xl space-y-1 relative hover:border-blue-900 transition-all">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h4 className="text-xs font-extrabold text-slate-100 leading-tight">
@@ -944,7 +946,7 @@ export default function PosModule({
                         </div>
                         <button 
                           onClick={() => removeFromCart(cartItem.item.id)}
-                          className="text-slate-500 hover:text-rose-400 p-0.5 hover:bg-[#121A2E] rounded transition-colors cursor-pointer shrink-0"
+                          className="text-slate-500 hover:text-rose-400 p-0.5 hover:bg-[#1e293b] rounded transition-colors cursor-pointer shrink-0"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -956,7 +958,7 @@ export default function PosModule({
                         </span>
                         
                         {/* Interactive Quantity Adjuster */}
-                        <div className="flex items-center gap-1 bg-[#121A2E]/80 border border-blue-950 rounded-lg p-0.5">
+                        <div className="flex items-center gap-1 bg-[#1e293b]/80 border border-blue-950 rounded-lg p-0.5">
                           <button 
                             onClick={() => updateQty(cartItem.item.id, -1)} 
                             className="h-4 w-4 rounded bg-[#1C2849] hover:bg-slate-800 flex items-center justify-center text-slate-300 transition-colors cursor-pointer"
@@ -981,7 +983,7 @@ export default function PosModule({
                           const val = e.target.value;
                           setCart(cart.map(c => c.item.id === cartItem.item.id ? { ...c, notes: val } : c));
                         }}
-                        className="w-full h-5 bg-[#121A2E]/50 border border-blue-950/40 rounded px-1.5 py-0 text-[8px] text-slate-300 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
+                        className="w-full h-5 bg-[#1e293b]/50 border border-blue-950/40 rounded px-1.5 py-0 text-[8px] text-slate-300 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
                       />
                     </div>
                   ))
@@ -989,7 +991,7 @@ export default function PosModule({
               </div>
 
               {/* Invoicing, Totals & Payment panel */}
-              <div className="p-4 bg-[#0A0F1D]/60 border-t border-blue-950/60 space-y-3 shrink-0">
+              <div className="p-4 bg-[#030712]/60 border-t border-blue-950/60 space-y-3 shrink-0">
                 
                 {/* Billing Details (Minimized & sleek) */}
                 <div className="flex gap-2">
@@ -998,14 +1000,14 @@ export default function PosModule({
                     placeholder="Cliente (Opcional)"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="flex-1 bg-[#121A2E]/80 border border-blue-950 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-sans"
+                    className="flex-1 bg-[#1e293b]/80 border border-blue-950 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-sans"
                   />
                   <input
                     type="text"
                     placeholder="Cédula / NIT"
                     value={customerDocument}
                     onChange={(e) => setCustomerDocument(e.target.value)}
-                    className="w-24 bg-[#121A2E]/80 border border-blue-950 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-24 bg-[#1e293b]/80 border border-blue-950 rounded-lg px-2.5 py-1.5 text-[10px] text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
 
@@ -1036,10 +1038,10 @@ export default function PosModule({
                       openCheckoutModal();
                     }}
                     disabled={cart.length === 0}
-                    className="w-full bg-[#06B6D4] hover:bg-[#06B6D4]/90 disabled:opacity-30 disabled:cursor-not-allowed text-[#0F172A] py-3.5 px-4 rounded-xl font-extrabold text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-2.5 transition-all select-none shadow-lg shadow-[#06B6D4]/10 active:scale-[0.98]"
+                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 disabled:opacity-30 disabled:cursor-not-allowed text-white py-3.5 px-4 rounded-xl font-extrabold text-xs uppercase tracking-wider cursor-pointer flex items-center justify-center gap-2.5 transition-all select-none shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
                     id="pos-proceed-payment-button"
                   >
-                    <CreditCard className="h-4.5 w-4.5 text-[#0F172A]" />
+                    <CreditCard className="h-4.5 w-4.5 text-white" />
                     <span>PROCESAR COBRO / PAGO</span>
                   </button>
                 </div>
@@ -1048,7 +1050,7 @@ export default function PosModule({
                 <button
                   onClick={handleSaveComanda}
                   disabled={cart.length === 0}
-                  className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-slate-300 font-extrabold text-[10px] uppercase py-2 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-slate-700/60"
+                  className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-slate-200 font-extrabold text-[10px] uppercase py-2 rounded-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all border border-slate-700/60"
                   id="pos-save-comanda-button"
                   title="Enviar Orden a Cocina sin cobrar"
                 >
@@ -1326,56 +1328,56 @@ export default function PosModule({
 
       {/* CHECKOUT WIZARD DIALOG (REPORT Z) */}
       {showZWizard && (
-        <div className="fixed inset-0 z-50 bg-zinc-950/70 backdrop-blur-md flex items-center justify-center p-4 font-sans text-zinc-800">
-          <div className="bg-white border border-zinc-200 rounded-[2rem] p-8 w-full max-w-lg shadow-2xl relative space-y-6">
+        <div className="fixed inset-0 z-50 bg-[#030712]/70 backdrop-blur-md flex items-center justify-center p-4 font-sans text-slate-50">
+          <div className="bg-[#0f172a] border border-[#1e293b] rounded-[2rem] p-8 w-full max-w-lg shadow-2xl relative space-y-6">
             <button 
               onClick={() => setShowZWizard(false)}
-              className="absolute top-6 right-6 p-1.5 rounded-full text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-all cursor-pointer"
+              className="absolute top-6 right-6 p-1.5 rounded-full text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-all cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <h3 className="text-base font-bold text-zinc-900 tracking-tight flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-50 tracking-tight flex items-center gap-2">
               <AlertTriangle className="text-amber-500 h-5 w-5" />
               Proceso Fiscal: Arqueo y Cierre de Caja (Z)
             </h3>
 
             {/* Stepper progress indicator */}
-            <div className="flex items-center justify-between font-mono text-[9px] font-bold uppercase text-zinc-400 border-b border-zinc-100 pb-4">
-              <span className={zStep >= 1 ? 'text-blue-600 font-extrabold' : ''}>1. Base</span>
-              <span className="text-zinc-300">➔</span>
-              <span className={zStep >= 2 ? 'text-blue-600 font-extrabold' : ''}>2. Efectivo</span>
-              <span className="text-zinc-300">➔</span>
-              <span className={zStep >= 3 ? 'text-blue-600 font-extrabold' : ''}>3. Bancos</span>
-              <span className="text-zinc-300">➔</span>
-              <span className={zStep >= 4 ? 'text-blue-600 font-extrabold' : ''}>4. Conciliación</span>
-              <span className="text-zinc-300">➔</span>
-              <span className={zStep >= 5 ? 'text-emerald-600 font-extrabold' : ''}>5. Cierre Z</span>
+            <div className="flex items-center justify-between font-mono text-[9px] font-bold uppercase text-slate-500 border-b border-[#1e293b] pb-4">
+              <span className={zStep >= 1 ? 'text-[#00f2fe] font-extrabold' : ''}>1. Base</span>
+              <span className="text-slate-700">➔</span>
+              <span className={zStep >= 2 ? 'text-[#00f2fe] font-extrabold' : ''}>2. Efectivo</span>
+              <span className="text-slate-700">➔</span>
+              <span className={zStep >= 3 ? 'text-[#00f2fe] font-extrabold' : ''}>3. Bancos</span>
+              <span className="text-slate-700">➔</span>
+              <span className={zStep >= 4 ? 'text-[#00f2fe] font-extrabold' : ''}>4. Conciliación</span>
+              <span className="text-slate-700">➔</span>
+              <span className={zStep >= 5 ? 'text-emerald-400 font-extrabold' : ''}>5. Cierre Z</span>
             </div>
 
             {/* Step 1 Content */}
             {zStep === 1 && (
               <div className="space-y-4">
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   Verifique el fondo fijo o base de caja con el que se abrió el turno comercial para dar cambios a clientes.
                 </p>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase block tracking-wider">Fondo Fijo Base (Apertura)</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block tracking-wider">Fondo Fijo Base (Apertura)</label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-3 text-zinc-400 font-mono">$</span>
+                    <span className="absolute left-3.5 top-3 text-slate-400 font-mono">$</span>
                     <input
                       type="number"
                       value={openingCash}
                       onChange={(e) => setOpeningCash(Number(e.target.value))}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 pl-8 pr-4 font-mono text-sm text-zinc-800 focus:outline-none focus:border-blue-500"
+                      className="w-full bg-[#030712] border border-[#1e293b] rounded-xl py-3 pl-8 pr-4 font-mono text-sm text-slate-50 focus:outline-none focus:border-[#00f2fe] focus:ring-2 focus:ring-[#00f2fe]/50"
                     />
                   </div>
                 </div>
-                <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100">
-                  <button onClick={() => setShowZWizard(false)} className="px-4 py-2 bg-zinc-100 text-zinc-600 rounded-xl text-xs hover:bg-zinc-200 transition-all cursor-pointer font-semibold">
+                <div className="flex justify-end gap-3 pt-4 border-t border-[#1e293b]">
+                  <button onClick={() => setShowZWizard(false)} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs hover:bg-slate-700 transition-all cursor-pointer font-semibold">
                     Cancelar
                   </button>
-                  <button onClick={() => setZStep(2)} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all cursor-pointer">
+                  <button onClick={() => setZStep(2)} className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-slate-50 font-bold rounded-xl text-xs hover:from-emerald-500 hover:to-teal-400 transition-all cursor-pointer">
                     Siguiente Paso
                   </button>
                 </div>
@@ -1385,27 +1387,27 @@ export default function PosModule({
             {/* Step 2 Content */}
             {zStep === 2 && (
               <div className="space-y-4">
-                <p className="text-xs text-zinc-500 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   Realice el arqueo e ingrese el total de billetes y monedas contados físicamente en el cajón de la registradora.
                 </p>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-zinc-500 uppercase block tracking-wider">Total Efectivo Físico Arqueado</label>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block tracking-wider">Total Efectivo Físico Arqueado</label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-3 text-emerald-600 font-mono">$</span>
+                    <span className="absolute left-3.5 top-3 text-emerald-400 font-mono">$</span>
                     <input
                       type="number"
                       value={countedCash || ''}
                       onChange={(e) => setCountedCash(Number(e.target.value))}
-                      className="w-full bg-zinc-50 border border-zinc-200 rounded-xl py-3 pl-8 pr-4 font-mono text-sm text-zinc-800 focus:outline-none focus:border-blue-500"
+                      className="w-full bg-[#030712] border border-[#1e293b] rounded-xl py-3 pl-8 pr-4 font-mono text-sm text-slate-50 focus:outline-none focus:border-[#00f2fe] focus:ring-2 focus:ring-[#00f2fe]/50"
                       placeholder="COP 0"
                     />
                   </div>
                 </div>
-                <div className="flex justify-between pt-4 border-t border-zinc-100">
-                  <button onClick={() => setZStep(1)} className="px-4 py-2 bg-zinc-100 text-zinc-600 rounded-xl text-xs hover:bg-zinc-200 transition-all cursor-pointer font-semibold">
+                <div className="flex justify-between pt-4 border-t border-[#1e293b]">
+                  <button onClick={() => setZStep(1)} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs hover:bg-slate-700 transition-all cursor-pointer font-semibold">
                     Atrás
                   </button>
-                  <button onClick={() => setZStep(3)} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all cursor-pointer">
+                  <button onClick={() => setZStep(3)} className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-slate-50 font-bold rounded-xl text-xs hover:from-emerald-500 hover:to-teal-400 transition-all cursor-pointer">
                     Siguiente Paso
                   </button>
                 </div>
@@ -1415,28 +1417,28 @@ export default function PosModule({
             {/* Step 3 Content */}
             {zStep === 3 && (
               <div className="space-y-4 font-sans text-xs">
-                <p className="text-zinc-500 leading-relaxed">
+                <p className="text-slate-400 leading-relaxed">
                   Ventas no-efectivo validadas por el sistema correspondientes a terminales POS (tarjetas) y transferencias bancarias.
                 </p>
-                <div className="bg-zinc-50 p-4.5 rounded-2xl border border-zinc-200 space-y-2.5 font-mono text-xs">
-                  <div className="flex justify-between text-zinc-600">
+                <div className="bg-[#030712] p-4.5 rounded-2xl border border-[#1e293b] space-y-2.5 font-mono text-xs">
+                  <div className="flex justify-between text-slate-400">
                     <span>Ventas por Tarjeta:</span>
-                    <span className="text-zinc-900 font-bold">${cardSalesExpected.toLocaleString()} COP</span>
+                    <span className="text-slate-200 font-bold">${cardSalesExpected.toLocaleString()} COP</span>
                   </div>
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between text-slate-400">
                     <span>Ventas por Bancos / QR:</span>
-                    <span className="text-zinc-900 font-bold">${transferSalesExpected.toLocaleString()} COP</span>
+                    <span className="text-slate-200 font-bold">${transferSalesExpected.toLocaleString()} COP</span>
                   </div>
-                  <div className="flex justify-between border-t border-zinc-200 pt-2 font-bold text-zinc-700">
+                  <div className="flex justify-between border-t border-[#1e293b] pt-2 font-bold text-slate-300">
                     <span>Total Digital Esperado:</span>
-                    <span className="text-blue-600 font-extrabold">${(cardSalesExpected + transferSalesExpected).toLocaleString()} COP</span>
+                    <span className="text-[#00f2fe] font-extrabold">${(cardSalesExpected + transferSalesExpected).toLocaleString()} COP</span>
                   </div>
                 </div>
-                <div className="flex justify-between pt-4 border-t border-zinc-100">
-                  <button onClick={() => setZStep(2)} className="px-4 py-2 bg-zinc-100 text-zinc-600 rounded-xl text-xs hover:bg-zinc-200 transition-all cursor-pointer font-semibold">
+                <div className="flex justify-between pt-4 border-t border-[#1e293b]">
+                  <button onClick={() => setZStep(2)} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs hover:bg-slate-700 transition-all cursor-pointer font-semibold">
                     Atrás
                   </button>
-                  <button onClick={() => setZStep(4)} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 transition-all cursor-pointer">
+                  <button onClick={() => setZStep(4)} className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-500 text-slate-50 font-bold rounded-xl text-xs hover:from-emerald-500 hover:to-teal-400 transition-all cursor-pointer">
                     Ver Conciliación
                   </button>
                 </div>
@@ -1446,55 +1448,55 @@ export default function PosModule({
             {/* Step 4 Content */}
             {zStep === 4 && (
               <div className="space-y-4 font-sans text-xs">
-                <p className="text-zinc-500 leading-relaxed">
+                <p className="text-slate-400 leading-relaxed">
                   Comparación automatizada del efectivo teórico (Apertura + Ventas) contra el conteo físico real ingresado.
                 </p>
 
-                <div className="bg-zinc-50 p-4.5 rounded-2xl border border-zinc-200 space-y-3 font-mono text-xs">
-                  <div className="flex justify-between text-zinc-600">
+                <div className="bg-[#030712] p-4.5 rounded-2xl border border-[#1e293b] space-y-3 font-mono text-xs">
+                  <div className="flex justify-between text-slate-400">
                     <span>(+) Base de Caja Inicial:</span>
-                    <span className="text-zinc-700 font-bold">${openingCash.toLocaleString()}</span>
+                    <span className="text-slate-300 font-bold">${openingCash.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between text-slate-400">
                     <span>(+) Ventas Efectivo Esperado:</span>
-                    <span className="text-zinc-700 font-bold">${cashSalesExpected.toLocaleString()}</span>
+                    <span className="text-slate-300 font-bold">${cashSalesExpected.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-b border-zinc-200 pb-2 text-zinc-800 font-bold">
+                  <div className="flex justify-between border-b border-[#1e293b] pb-2 text-slate-200 font-bold">
                     <span>(=) Total Efectivo Teórico:</span>
-                    <span className="text-zinc-900">${(openingCash + cashSalesExpected).toLocaleString()}</span>
+                    <span className="text-slate-50">${(openingCash + cashSalesExpected).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-zinc-600">
+                  <div className="flex justify-between text-slate-400">
                     <span>(-) Su Conteo Físico Real:</span>
-                    <span className="text-blue-600 font-bold">${countedCash.toLocaleString()}</span>
+                    <span className="text-[#00f2fe] font-bold">${countedCash.toLocaleString()}</span>
                   </div>
 
                   {/* Computes difference */}
                   {countedCash - (openingCash + cashSalesExpected) === 0 ? (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-xl text-[11px] font-bold flex items-center gap-1.5 mt-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-600" />
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-3 rounded-xl text-[11px] font-bold flex items-center gap-1.5 mt-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
                       <span>Arqueo de Caja Perfecto: Diferencia de $0 COP.</span>
                     </div>
                   ) : (
-                    <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-[11px] space-y-1 mt-2">
+                    <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-3 rounded-xl text-[11px] space-y-1 mt-2">
                       <div className="font-bold flex items-center gap-1">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <AlertTriangle className="h-4 w-4 text-rose-500" />
                         <span>Descuadre Detectado en Caja:</span>
                       </div>
                       <p className="font-bold">
                         Diferencia: {countedCash - (openingCash + cashSalesExpected) > 0 ? `Sobrante de +$${(countedCash - (openingCash + cashSalesExpected)).toLocaleString()}` : `Faltante de -$${Math.abs(countedCash - (openingCash + cashSalesExpected)).toLocaleString()}`} COP.
                       </p>
-                      <p className="text-[10px] text-zinc-400 font-medium italic mt-1">
+                      <p className="text-[10px] text-slate-500 font-medium italic mt-1">
                         La discrepancia se registrará de forma permanente en la bitácora fiscal del sistema de auditoría.
                       </p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between pt-4 border-t border-zinc-100">
-                  <button onClick={() => setZStep(3)} className="px-4 py-2 bg-zinc-100 text-zinc-600 rounded-xl text-xs hover:bg-zinc-200 transition-all cursor-pointer font-semibold">
+                <div className="flex justify-between pt-4 border-t border-[#1e293b]">
+                  <button onClick={() => setZStep(3)} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs hover:bg-slate-700 transition-all cursor-pointer font-semibold">
                     Atrás
                   </button>
-                  <button onClick={executeZClosure} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-md">
+                  <button onClick={executeZClosure} className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-slate-50 font-bold rounded-xl text-xs transition-all cursor-pointer shadow-md">
                     Confirmar Arqueo y Emitir Reporte Z
                   </button>
                 </div>
@@ -1504,14 +1506,14 @@ export default function PosModule({
             {/* Step 5 Content: Finished Report Z printable view */}
             {zStep === 5 && zFinishedReport && (
               <div className="space-y-4 font-sans text-xs">
-                <div className="bg-zinc-50 p-5 rounded-2xl border border-zinc-200 text-center font-mono space-y-3 shadow-sm max-h-[300px] overflow-y-auto">
-                  <h4 className="font-bold border-b border-dashed border-zinc-300 pb-2 text-zinc-800">REPORTE FISCAL Z</h4>
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold">Cierre definitivo de jornada</p>
-                  <div className="text-left text-[11px] space-y-1 text-zinc-600">
+                <div className="bg-[#030712] p-5 rounded-2xl border border-[#1e293b] text-center font-mono space-y-3 shadow-sm max-h-[300px] overflow-y-auto">
+                  <h4 className="font-bold border-b border-dashed border-[#1e293b] pb-2 text-slate-200">REPORTE FISCAL Z</h4>
+                  <p className="text-[10px] text-slate-400 uppercase font-bold">Cierre definitivo de jornada</p>
+                  <div className="text-left text-[11px] space-y-1 text-slate-300">
                     <div><strong>Código Fiscal:</strong> {zFinishedReport.reportZCode}</div>
                     <div><strong>Fecha/Hora:</strong> {new Date(zFinishedReport.timestamp).toLocaleString()}</div>
                     <div><strong>Arqueador:</strong> {zFinishedReport.closedBy}</div>
-                    <div className="border-t border-dashed border-zinc-200 my-2 pt-2"></div>
+                    <div className="border-t border-dashed border-[#1e293b] my-2 pt-2"></div>
                     <div className="flex justify-between">
                       <span>Total Facturado:</span>
                       <span>${zFinishedReport.totalSales.toLocaleString()}</span>
@@ -1532,21 +1534,21 @@ export default function PosModule({
                       <span>Total Bancos/QR:</span>
                       <span>${zFinishedReport.transferSales.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between font-bold border-t border-zinc-300 pt-1.5 text-zinc-900">
+                    <div className="flex justify-between font-bold border-t border-[#1e293b] pt-1.5 text-slate-50">
                       <span>Diferencia Arqueo:</span>
-                      <span className={zFinishedReport.difference === 0 ? 'text-emerald-600' : 'text-red-500'}>
+                      <span className={zFinishedReport.difference === 0 ? 'text-emerald-400' : 'text-rose-500'}>
                         ${zFinishedReport.difference.toLocaleString()}
                       </span>
                     </div>
                   </div>
                   <div className="pt-2">
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200 font-bold block text-center uppercase tracking-wider">
+                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 font-bold block text-center uppercase tracking-wider">
                       JORNADA CERRADA FISCALMENTE
                     </span>
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-4 border-t border-zinc-100">
+                <div className="flex justify-end gap-2 pt-4 border-t border-[#1e293b]">
                   <button 
                     onClick={() => {
                       const printData = JSON.stringify(zFinishedReport, null, 2);
@@ -1557,14 +1559,14 @@ export default function PosModule({
                       a.download = `Reporte_Z_${zFinishedReport.date}_Sede_${sedeId}.txt`;
                       a.click();
                     }}
-                    className="px-4 py-2.5 bg-zinc-100 text-zinc-700 border border-zinc-200 font-semibold rounded-xl text-xs hover:bg-zinc-200 flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    className="px-4 py-2.5 bg-slate-800 text-slate-300 border border-[#1e293b] font-semibold rounded-xl text-xs hover:bg-slate-700 flex items-center gap-1.5 cursor-pointer shadow-sm"
                   >
-                    <Download className="h-4 w-4 text-zinc-500" />
+                    <Download className="h-4 w-4 text-slate-400" />
                     Descargar Reporte (.TXT)
                   </button>
                   <button 
                     onClick={() => setShowZWizard(false)} 
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-md shadow-blue-600/10"
+                    className="px-5 py-2.5 bg-gradient-to-r from-[#00f2fe] to-blue-500 hover:from-blue-400 hover:to-[#00f2fe] text-slate-950 font-bold rounded-xl text-xs transition-all cursor-pointer shadow-md shadow-[#00f2fe]/10"
                   >
                     Finalizar Proceso
                   </button>

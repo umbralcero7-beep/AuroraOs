@@ -1,8 +1,11 @@
+export type AuroraRole = 'super_admin' | 'admin' | 'cashier' | 'waiter' | 'kitchen';
+
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'SUPPORT' | 'CASHIER' | 'WAITER' | 'CHEF' | 'HR' | 'FINANCE' | 'INVENTORY';
+  role: AuroraRole;
+  allowedModules: string[];
   sedeId: string;
   active: boolean;
   twoFactorEnabled: boolean;
@@ -24,7 +27,7 @@ export interface Sede {
 export interface WhitelistedUser {
   id: string;
   email: string;
-  role: 'ADMIN' | 'SUPPORT' | 'CASHIER' | 'WAITER' | 'CHEF' | 'HR' | 'FINANCE' | 'INVENTORY';
+  role: AuroraRole;
   sedeId: string;
   tempKey: string;
   createdTime: string;

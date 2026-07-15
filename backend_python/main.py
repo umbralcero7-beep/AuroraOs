@@ -15,7 +15,7 @@ from .schemas import (
     StreetCheckoutRequest
 )
 
-app = FastAPI(title="Aurora OS - Delivery Management Core (Umbral Cero)")
+app = FastAPI(title="Aurora - Delivery Management Core (Umbral Cero)")
 
 # Add CORS Middleware for tablet client communication
 app.add_middleware(

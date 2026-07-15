@@ -1,4 +1,4 @@
-# Arquitectura de Domicilios Aurora OS (Marca: Umbral Cero)
+# Arquitectura de Domicilios Aurora (Marca: Umbral Cero)
 Este directorio contiene la implementación de referencia en **Python (FastAPI + SQLAlchemy + SQLite)** para el sistema reestructurado de gestión de domicilios de alta demanda.
 
 ## 📁 Estructura de Archivos del Proyecto

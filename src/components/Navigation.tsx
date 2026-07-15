@@ -60,21 +60,25 @@ export default function Navigation({
   };
 
   const tabs = [
-    { id: 'pos', name: 'POS & Caja', icon: ShoppingCart, roles: ['ADMIN', 'SUPPORT', 'CASHIER'] },
-    { id: 'reportes', name: 'Reportes & Auditoría', icon: BarChart3, roles: ['ADMIN', 'SUPPORT'] },
-    { id: 'comandas_waiter', name: 'Módulo de Comandas', icon: Coffee, roles: ['ADMIN', 'SUPPORT', 'WAITER'] },
-    { id: 'cocina_kds', name: 'Módulo de Cocina (KDS)', icon: ChefHat, roles: ['ADMIN', 'SUPPORT', 'CHEF'] },
-    { id: 'domicilios', name: 'Domicilios & Repartidor', icon: Truck, roles: ['ADMIN', 'SUPPORT', 'CASHIER', 'WAITER'] },
-    { id: 'inventario', name: 'Inventario ERP', icon: Package2, roles: ['ADMIN', 'SUPPORT', 'INVENTORY', 'CHEF'] },
-    { id: 'contabilidad', name: 'Contabilidad & Colchón', icon: DollarSign, roles: ['ADMIN', 'SUPPORT', 'FINANCE'] },
-    { id: 'rrhh', name: 'Personal & Bitácora', icon: Users2, roles: ['ADMIN', 'SUPPORT', 'HR'] },
-    { id: 'asistente', name: 'Asistente IA (Cero)', icon: BrainCircuit, roles: ['ADMIN', 'SUPPORT', 'CASHIER', 'WAITER', 'CHEF', 'HR', 'FINANCE', 'INVENTORY'] },
-    { id: 'workspace', name: 'Integración Google', icon: Cloud, roles: ['ADMIN', 'SUPPORT', 'CASHIER', 'WAITER', 'CHEF', 'HR', 'FINANCE', 'INVENTORY'] },
-    { id: 'seguridad', name: 'Soporte & Ciberseguridad', icon: Lock, roles: ['ADMIN', 'SUPPORT'] }
+    { id: 'pos', name: 'POS & Caja', icon: ShoppingCart, roles: ['super_admin', 'admin', 'cashier'] },
+    { id: 'reportes', name: 'Reportes & Auditoría', icon: BarChart3, roles: ['super_admin', 'admin'] },
+    { id: 'comandas_waiter', name: 'Módulo de Comandas', icon: Coffee, roles: ['super_admin', 'admin', 'waiter'] },
+    { id: 'cocina_kds', name: 'Módulo de Cocina (KDS)', icon: ChefHat, roles: ['super_admin', 'admin', 'kitchen'] },
+    { id: 'domicilios', name: 'Domicilios & Repartidor', icon: Truck, roles: ['super_admin', 'admin', 'cashier', 'waiter'] },
+    { id: 'inventario', name: 'Inventario ERP', icon: Package2, roles: ['super_admin', 'admin'] },
+    { id: 'contabilidad', name: 'Contabilidad & Colchón', icon: DollarSign, roles: ['super_admin', 'admin'] },
+    { id: 'rrhh', name: 'Personal & Bitácora', icon: Users2, roles: ['super_admin', 'admin'] },
+    { id: 'asistente', name: 'Asistente IA (Cero)', icon: BrainCircuit, roles: ['super_admin', 'admin'] },
+    { id: 'workspace', name: 'Integración Google', icon: Cloud, roles: ['super_admin', 'admin'] },
+    { id: 'seguridad', name: 'Soporte & Ciberseguridad', icon: Lock, roles: ['super_admin'] }
   ];
 
-  // Filter tabs by role
-  const allowedTabs = tabs.filter(t => t.roles.includes(currentUser.role));
+  // Filter tabs by role and explicit allowedModules
+  const allowedTabs = tabs.filter(t => 
+    currentUser.role === 'super_admin' || 
+    t.roles.includes(currentUser.role) ||
+    (currentUser.allowedModules && currentUser.allowedModules.includes(t.id))
+  );
 
   const activeSede = sedes.find(s => s.id === selectedSedeId) || sedes[0];
 
@@ -99,7 +103,7 @@ export default function Navigation({
         fixed inset-y-0 left-0 z-50 lg:relative lg:translate-x-0
         ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${isCollapsed ? 'lg:w-20' : 'lg:w-64'} w-[280px]
-        bg-[#09090b] border-r border-zinc-850 flex flex-col shrink-0 font-sans transition-all duration-300 ease-in-out
+        bg-[#030712] border-r border-zinc-850 flex flex-col shrink-0 font-sans transition-all duration-300 ease-in-out
       `}>
         {/* Brand Header */}
         <div className={`p-4 border-b border-zinc-800 bg-zinc-900/10 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
@@ -108,7 +112,7 @@ export default function Navigation({
               <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-blue-950/40 border border-zinc-800">
                 <img 
                   src="/icon_pwa.svg" 
-                  alt="Aurora OS Logo" 
+                  alt="Aurora Logo" 
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
@@ -126,10 +130,7 @@ export default function Navigation({
               </div>
               {(!isCollapsed || isMobileOpen) && (
                 <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1 whitespace-nowrap animate-fade-in">
-                  AURORA<span className="text-blue-500">OS</span>
-                  <span className="text-[9px] font-mono bg-zinc-800 text-zinc-400 px-1 py-0.5 rounded border border-zinc-700">
-                    v4.5
-                  </span>
+                  AURORA
                 </h1>
               )}
             </div>

@@ -420,7 +420,7 @@ export default function DeliveryModule({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono bg-cyan-500/10 text-cyan-400 font-black px-2 py-0.5 rounded border border-cyan-500/20 uppercase tracking-widest">
-              Aurora OS
+              Aurora
             </span>
             <span className="text-slate-500 text-xs font-mono font-medium">// Umbral Cero Workstation</span>
           </div>
@@ -492,7 +492,7 @@ export default function DeliveryModule({
                 })}
               </div>
               <div className="px-4 text-[9px] font-mono text-slate-600 hidden md:block">
-                AURORA OS v2.0<br />Sede Poblado
+                AURORA<br />Sede Poblado
               </div>
             </div>
 

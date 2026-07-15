@@ -45,11 +45,22 @@ export default function PwaInstallModal({ isOpen, onClose, deferredPrompt }: Pwa
         
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
-          <div className="flex items-center gap-2">
-            <Download className="h-5 w-5 text-blue-400 shrink-0" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-slate-700 bg-slate-950 shadow-md">
+              <img 
+                src="/icon_pwa.svg" 
+                alt="Aurora Logo" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.src = '/icon_pwa.jpg';
+                }}
+              />
+            </div>
             <div>
-              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-100 font-mono">
-                Instalar Aurora OS
+              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-100 font-mono flex items-center gap-1.5">
+                Instalar Aurora <span className="text-[9px] font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded tracking-normal normal-case">PWA</span>
               </h4>
               <p className="text-[10px] text-slate-400 font-mono mt-0.5">Acceso nativo desde escritorio y móviles</p>
             </div>
@@ -123,7 +134,7 @@ export default function PwaInstallModal({ isOpen, onClose, deferredPrompt }: Pwa
                 <li>Asegúrate de que estás en una pestaña independiente (no en el editor de AI Studio).</li>
                 <li>Mira a la derecha de la barra de direcciones de tu navegador, verás un icono de **pantalla con una flecha de descarga** <Monitor className="inline h-3 w-3 mx-1 text-blue-400" />.</li>
                 <li>Haz clic en ese icono y confirma la instalación.</li>
-                <li>O abre el menú de tres puntos <span className="font-bold">⋮</span> y selecciona <span className="text-white font-bold">"Instalar Aurora OS..."</span>.</li>
+                <li>O abre el menú de tres puntos <span className="font-bold">⋮</span> y selecciona <span className="text-white font-bold">"Instalar Aurora..."</span>.</li>
               </ul>
             </div>
 
