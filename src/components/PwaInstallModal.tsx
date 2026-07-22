@@ -48,13 +48,13 @@ export default function PwaInstallModal({ isOpen, onClose, deferredPrompt }: Pwa
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border border-slate-700 bg-slate-950 shadow-md">
               <img 
-                src="/icon_pwa.svg" 
+                src="/icon_512.png" 
                 alt="Aurora Logo" 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   const target = e.currentTarget;
-                  target.src = '/icon_pwa.jpg';
+                  target.src = '/icon_192.png';
                 }}
               />
             </div>

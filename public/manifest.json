@@ -3,32 +3,26 @@
   "name": "Aurora - Restaurant Management",
   "icons": [
     {
-      "src": "/icon_pwa.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon_pwa.jpg",
-      "type": "image/jpeg",
+      "src": "/icon_192.png",
+      "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/icon_pwa.jpg",
-      "type": "image/jpeg",
+      "src": "/icon_512.png",
+      "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "/icon_pwa.jpg",
-      "type": "image/jpeg",
+      "src": "/icon_192.png",
+      "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "/icon_pwa.jpg",
-      "type": "image/jpeg",
+      "src": "/icon_512.png",
+      "type": "image/png",
       "sizes": "512x512",
       "purpose": "maskable"
     }

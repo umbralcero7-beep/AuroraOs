@@ -1,12 +1,11 @@
 // Aurora - PWA Service Worker
-const CACHE_NAME = 'auroraos-cache-v4';
+const CACHE_NAME = 'auroraos-cache-v5';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon_pwa.svg',
-  '/icon_pwa.jpg',
-  '/icon.jpg'
+  '/icon_192.png',
+  '/icon_512.png'
 ];
 
 self.addEventListener('install', (event) => {

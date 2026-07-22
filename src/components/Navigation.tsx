@@ -119,20 +119,13 @@ export default function Navigation({
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-blue-950/40 border border-zinc-800">
                 <img 
-                  src="/icon_pwa.svg" 
+                  src="/icon_512.png" 
                   alt="Aurora Logo" 
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.currentTarget;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      const fallback = document.createElement('div');
-                      fallback.className = 'w-full h-full bg-blue-600 flex items-center justify-center font-bold text-white text-sm';
-                      fallback.innerText = 'A';
-                      parent.appendChild(fallback);
-                    }
+                    target.src = '/icon_192.png';
                   }}
                 />
               </div>
