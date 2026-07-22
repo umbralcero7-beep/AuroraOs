@@ -63,6 +63,8 @@ export interface AppNotification {
 export default function App() {
   // DB States
   const [sedes, setSedes] = useState<Sede[]>([]);
+  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [activeOrgId, setActiveOrgId] = useState<string>('org-aurora');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [insumos, setInsumos] = useState<Insumo[]>([]);
@@ -416,6 +418,13 @@ export default function App() {
       const data = await res.json();
       
       setSedes(data.sedes);
+      if (data.sedes && data.sedes.length > 0) {
+        // Usar función de actualización de estado para evitar depender del valor de renderizado anterior
+        setActiveSedeId(prev => {
+          const exists = data.sedes.some((s: any) => s.id === prev);
+          return exists ? prev : data.sedes[0].id;
+        });
+      }
       setMenuItems(data.menuItems);
       setInsumos(data.insumos);
       setComandas(data.comandas);
@@ -428,6 +437,7 @@ export default function App() {
       setWhitelistedUsers(data.whitelistedUsers);
       setHrColaboradores(data.hrColaboradores);
       setWaiterBitacoras(data.waiterBitacoras);
+      setOrganizations(data.organizations || []);
 
       setIsConnected(true);
     } catch (err) {
@@ -449,6 +459,26 @@ export default function App() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Synchronize activeSedeId when switching SaaS tenants
+  useEffect(() => {
+    if (sedes.length === 0) return;
+    const orgSedes = sedes.filter((s: any) => {
+      if (activeOrgId === 'org-aurora') {
+        return !s.orgId || s.orgId === 'org-aurora';
+      }
+      return s.orgId === activeOrgId;
+    });
+
+    if (orgSedes.length > 0) {
+      const isSedeInTenant = orgSedes.some((s: any) => s.id === activeSedeId);
+      if (!isSedeInTenant) {
+        setActiveSedeId(orgSedes[0].id);
+      }
+    } else {
+      setActiveSedeId('');
+    }
+  }, [activeOrgId, sedes, activeSedeId]);
 
   // Format session timer
   const formatTime = (secs: number) => {
@@ -531,7 +561,7 @@ export default function App() {
       // Auto login admin
       const adminUser: User = {
         id: 'u1',
-        name: 'Carlos Mendoza',
+        name: 'Isaias',
         email: 'admin@aurora.com',
         role: 'super_admin',
         allowedModules: ['pos', 'reportes', 'comandas_waiter', 'cocina_kds', 'domicilios', 'inventario', 'contabilidad', 'rrhh', 'asistente', 'workspace', 'seguridad'],
@@ -602,7 +632,7 @@ export default function App() {
           )}
 
           {!showTwoFactor ? (
-            <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-4 text-xs text-zinc-300">
+            <form onSubmit={isRegistering ? handleRegister : handleLogin} className="space-y-4 text-xs text-zinc-300" autoComplete="off">
               <div className="space-y-1.5">
                 <label className="text-zinc-400 font-medium">Correo Electrónico Corporativo:</label>
                 <input 
@@ -611,6 +641,7 @@ export default function App() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@aurora.com"
+                  autoComplete="off"
                   className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 font-mono text-xs"
                 />
               </div>
@@ -623,6 +654,7 @@ export default function App() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  autoComplete="new-password"
                   className="w-full bg-zinc-950/80 border border-zinc-800 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 font-mono text-xs"
                 />
               </div>
@@ -719,12 +751,20 @@ export default function App() {
         setSelectedSedeId={setActiveSedeId}
         currentTab={activeTab}
         setCurrentTab={setActiveTab}
-        sedes={sedes}
+        sedes={sedes.filter((s: any) => {
+          if (activeOrgId === 'org-aurora') {
+            return !s.orgId || s.orgId === 'org-aurora';
+          }
+          return s.orgId === activeOrgId;
+        })}
         securityCount={securityLogs.length}
         isMobileOpen={isMobileSidebarOpen}
         onMobileClose={() => setIsMobileSidebarOpen(false)}
         isStandalone={isStandalone}
         onInstall={handleInstallClick}
+        organizations={organizations}
+        activeOrgId={activeOrgId}
+        setActiveOrgId={setActiveOrgId}
       />
 
       {/* Main Container */}
@@ -1048,6 +1088,9 @@ export default function App() {
                 securityLogs={securityLogs}
                 onTriggerAction={triggerAction}
                 refreshData={fetchState}
+                organizations={organizations}
+                activeOrgId={activeOrgId}
+                setActiveOrgId={setActiveOrgId}
               />
             </RouteGuard>
           )}

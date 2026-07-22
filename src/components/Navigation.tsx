@@ -32,6 +32,9 @@ interface NavigationProps {
   onMobileClose?: () => void;
   isStandalone?: boolean;
   onInstall?: () => void;
+  organizations?: any[];
+  activeOrgId?: string;
+  setActiveOrgId?: (id: string) => void;
 }
 
 export default function Navigation({
@@ -45,11 +48,16 @@ export default function Navigation({
   isMobileOpen,
   onMobileClose,
   isStandalone = false,
-  onInstall
+  onInstall,
+  organizations = [],
+  activeOrgId = 'org-aurora',
+  setActiveOrgId
 }: NavigationProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(() => {
     return localStorage.getItem('sidebar_collapsed') === 'true';
   });
+
+  const activeOrg = organizations.find(o => o.id === activeOrgId) || { name: 'Restaurante Aurora Gourmet', plan: 'PRO' };
 
   const handleToggle = () => {
     setIsCollapsed(prev => {
@@ -129,9 +137,14 @@ export default function Navigation({
                 />
               </div>
               {(!isCollapsed || isMobileOpen) && (
-                <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-1 whitespace-nowrap animate-fade-in">
-                  AURORA
-                </h1>
+                <div className="flex flex-col min-w-0">
+                  <h1 className="text-[11px] font-bold tracking-tight text-white truncate max-w-[140px] animate-fade-in uppercase" title={activeOrg.name}>
+                    {activeOrg.name}
+                  </h1>
+                  <span className="text-[8px] font-mono font-bold text-zinc-500 mt-0.5">
+                    PLAN <span className="text-blue-400">{activeOrg.plan}</span>
+                  </span>
+                </div>
               )}
             </div>
             

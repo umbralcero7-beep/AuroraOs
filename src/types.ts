@@ -15,6 +15,7 @@ export interface User {
 
 export interface Sede {
   id: string;
+  orgId?: string;
   name: string;
   address: string;
   phone: string;

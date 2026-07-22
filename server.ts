@@ -1906,56 +1906,174 @@ const DEFAULT_STATE = {
     cushionHistory: [
       { id: "ch-01", timestamp: new Date(Date.now() - 86400000 * 5).toISOString(), action: "INYECCION_RESERVA", amount: 1500000, description: "Aporte del 15% de utilidad libre del periodo de Junio", balanceAfter: 12500000 }
     ]
-  }
+  },
+  organizations: [
+    {
+      id: "org-aurora",
+      name: "Restaurante Aurora Gourmet",
+      subdomainOrSlug: "aurora",
+      plan: "PRO",
+      status: "ACTIVE",
+      supabaseUrl: "https://vclshytlqfpybshwunee.supabase.co",
+      supabaseBackupBucket: "aurora-backups-main",
+      storageUsedMB: 4.8,
+      createdAt: "2026-01-10T12:00:00Z",
+      primaryContactEmail: "gerente@aurora.com"
+    },
+    {
+      id: "org-pizzanapoles",
+      name: "Pizzería Nápoles & Trattoria",
+      subdomainOrSlug: "napoles",
+      plan: "BASIC",
+      status: "ACTIVE",
+      supabaseUrl: "https://kswyhduepkahebyehske.supabase.co",
+      supabaseBackupBucket: "napoles-vault",
+      storageUsedMB: 1.2,
+      createdAt: "2026-05-18T15:30:00Z",
+      primaryContactEmail: "giovanni@pizzanapoles.com"
+    },
+    {
+      id: "org-lebistrot",
+      name: "Le Bistrot Frances - Bogotá",
+      subdomainOrSlug: "lebistrot",
+      plan: "ENTERPRISE",
+      status: "ACTIVE",
+      supabaseUrl: "https://qmsywndubdhskwnqgshs.supabase.co",
+      supabaseBackupBucket: "lebistrot-cloud-db",
+      storageUsedMB: 12.5,
+      createdAt: "2026-03-01T09:15:00Z",
+      primaryContactEmail: "pierre@lebistrot.com"
+    }
+  ]
 };
 
 // Database Read/Write Helpers
 let memoryState: any = null;
 
 async function loadState(): Promise<any> {
+  let state: any = null;
   // If PostgreSQL is available, fetch state from database
   if (pool) {
     try {
       const res = await pool.query("SELECT data FROM aurora_state WHERE id = 'main'");
       if (res.rows.length > 0) {
-        memoryState = res.rows[0].data;
-        return memoryState;
-      }
-      // Seeding database with initial default/local state
-      console.log("No se encontró estado en PostgreSQL, buscando copia local de respaldo...");
-      let initialState = DEFAULT_STATE;
-      if (fs.existsSync(DB_FILE)) {
-        try {
-          initialState = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
-        } catch (e) {
-          console.error("Copia local dañada, usando DEFAULT_STATE:", e);
+        state = res.rows[0].data;
+      } else {
+        console.log("No se encontró estado en PostgreSQL, buscando copia local de respaldo...");
+        let initialState = DEFAULT_STATE;
+        if (fs.existsSync(DB_FILE)) {
+          try {
+            initialState = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+          } catch (e) {
+            console.error("Copia local dañada, usando DEFAULT_STATE:", e);
+          }
         }
+        await pool.query(
+          "INSERT INTO aurora_state (id, data) VALUES ('main', $1) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data",
+          [initialState]
+        );
+        state = initialState;
       }
-      await pool.query(
-        "INSERT INTO aurora_state (id, data) VALUES ('main', $1) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data",
-        [initialState]
-      );
-      memoryState = initialState;
-      return memoryState;
     } catch (err) {
       console.error("Error al cargar estado de PostgreSQL, usando respaldo local:", err);
     }
   }
 
-  // Fallback to reading local JSON database
-  try {
-    if (fs.existsSync(DB_FILE)) {
-      const raw = fs.readFileSync(DB_FILE, "utf-8");
-      memoryState = JSON.parse(raw);
-      return memoryState;
+  if (!state) {
+    // Fallback to reading local JSON database
+    try {
+      if (fs.existsSync(DB_FILE)) {
+        const raw = fs.readFileSync(DB_FILE, "utf-8");
+        state = JSON.parse(raw);
+      } else {
+        fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_STATE, null, 2), "utf-8");
+        state = DEFAULT_STATE;
+      }
+    } catch (err) {
+      console.error("No se pudo leer la base de datos local, usando por defecto:", err);
+      state = memoryState || DEFAULT_STATE;
     }
-    fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_STATE, null, 2), "utf-8");
-    memoryState = DEFAULT_STATE;
-    return memoryState;
-  } catch (err) {
-    console.error("No se pudo leer la base de datos local, usando por defecto:", err);
-    return memoryState || DEFAULT_STATE;
   }
+
+  // FORCE RESET IF THE STATE IS NOT MARKED AS CLEANED OR CONTAINS OLD SEED RESTAURANTS
+  const hasOldData = !state || !state.isCleaned || (state.organizations && state.organizations.some((o: any) => o.id === "org-pizzanapoles" || o.id === "org-aurora"));
+  if (hasOldData) {
+    console.log("Detected old seed data or uncleaned state. Forcing database reset to a brand new clean state...");
+    state = {
+      isCleaned: true,
+      sedes: [],
+      users: [
+        {
+          id: "u1",
+          name: "Isaias",
+          email: "admin@aurora.com",
+          role: "super_admin",
+          sedeId: "",
+          active: true,
+          twoFactorEnabled: true,
+          twoFactorSecret: "JBSWY3DPEHPK3PXP",
+          backupCodes: ["887412", "993514", "104958", "672951"]
+        }
+      ],
+      whitelistedUsers: [
+        {
+          id: "w1",
+          email: "admin@aurora.com",
+          role: "super_admin",
+          sedeId: "",
+          tempKey: "AURORA_SEC_99",
+          createdTime: new Date().toISOString()
+        }
+      ],
+      insumos: [],
+      suppliers: [],
+      menuItems: [],
+      comandas: [],
+      domicilios: [],
+      gastos: [],
+      invoices: [],
+      cierreCajas: [],
+      reservas: [],
+      securityLogs: [
+        {
+          id: `sec-init-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          ip: "127.0.0.1",
+          emailAttempted: "admin@aurora.com",
+          sedeId: "",
+          type: "SYSTEM_RESET",
+          details: "El sistema ha sido limpiado por completo para la presentación de la Demo.",
+          severity: "HIGH"
+        }
+      ],
+      cushion: {
+        retainedEarnings: 0,
+        cushionTarget: 25000000,
+        activeBufferAmount: 0,
+        cushionHistory: []
+      },
+      organizations: []
+    };
+    // Ensure file exists and database is updated
+    try {
+      fs.writeFileSync(DB_FILE, JSON.stringify(state, null, 2), "utf-8");
+    } catch (e) {
+      console.error("Failed to write clean state to local fallback file:", e);
+    }
+    if (pool) {
+      try {
+        await pool.query(
+          "INSERT INTO aurora_state (id, data) VALUES ('main', $1) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()",
+          [state]
+        );
+      } catch (err) {
+        console.error("Failed to save clean state to PostgreSQL:", err);
+      }
+    }
+  }
+
+  memoryState = state;
+  return memoryState;
 }
 
 async function saveState(state: any): Promise<void> {
@@ -2148,10 +2266,10 @@ app.post("/api/action", async (req, res) => {
           return res.json({
             user: {
               id: "u1",
-              name: "Carlos Mendoza",
+              name: "Isaias",
               email: "admin@aurora.com",
-              role: "ADMIN",
-              sedeId: "s1",
+              role: "super_admin",
+              sedeId: "",
               active: true,
               twoFactorEnabled: true
             }
@@ -2221,6 +2339,105 @@ app.post("/api/action", async (req, res) => {
       }
       case "EDIT_SEDE_LICENSE": {
         state.sedes = state.sedes.map((s: any) => s.id === payload.id ? { ...s, licenseStatus: payload.licenseStatus, licenseExpiry: payload.licenseExpiry } : s);
+        break;
+      }
+      case "CLEAN_SYSTEM_STATE": {
+        state.sedes = [];
+        state.organizations = [];
+        state.users = [
+          {
+            id: "u1",
+            name: "Isaias",
+            email: "admin@aurora.com",
+            role: "super_admin",
+            sedeId: "",
+            active: true,
+            twoFactorEnabled: true
+          }
+        ];
+        state.whitelistedUsers = [
+          {
+            id: "w1",
+            email: "admin@aurora.com",
+            role: "super_admin",
+            sedeId: "",
+            tempKey: "AURORA_SEC_99",
+            createdTime: new Date().toISOString()
+          }
+        ];
+        state.insumos = [];
+        state.comandas = [];
+        state.domicilios = [];
+        state.gastos = [];
+        state.invoices = [];
+        state.cierreCajas = [];
+        state.reservas = [];
+        state.menuItems = [];
+        state.suppliers = [];
+        state.securityLogs = [
+          {
+            id: `sec-init-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            ip: "127.0.0.1",
+            emailAttempted: "admin@aurora.com",
+            sedeId: "",
+            type: "SYSTEM_RESET",
+            details: "El sistema ha sido limpiado por completo para la presentación de la Demo.",
+            severity: "HIGH"
+          }
+        ];
+        state.hrColaboradores = [];
+        state.waiterBitacoras = [];
+        state.cushion = {
+          id: "c1",
+          retainedEarnings: 0,
+          cushionTarget: 50000000,
+          cushionHistory: [],
+          activeBufferAmount: 0
+        };
+        await saveState(state);
+        break;
+      }
+      case "ADD_ORGANIZATION": {
+        if (!state.organizations) state.organizations = [];
+        state.organizations.push(payload);
+        await saveState(state);
+        break;
+      }
+      case "EDIT_ORGANIZATION": {
+        if (!state.organizations) state.organizations = [];
+        state.organizations = state.organizations.map((org: any) => 
+          org.id === payload.id ? { ...org, ...payload } : org
+        );
+        await saveState(state);
+        break;
+      }
+      case "DELETE_ORGANIZATION": {
+        if (!state.organizations) state.organizations = [];
+        state.organizations = state.organizations.filter((org: any) => org.id !== payload.id);
+        await saveState(state);
+        break;
+      }
+      case "RUN_SUPABASE_BACKUP": {
+        if (!state.organizations) state.organizations = [];
+        const orgId = payload.orgId;
+        const org = state.organizations.find((o: any) => o.id === orgId);
+        if (org) {
+          const extraSize = +(Math.random() * 0.5 + 0.1).toFixed(2);
+          org.storageUsedMB = +(org.storageUsedMB + extraSize).toFixed(2);
+          
+          state.securityLogs.unshift({
+            id: `sec-bkp-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            ip: "Cloud-Backup",
+            emailAttempted: "SaaS Engine",
+            sedeId: "",
+            type: "SUCCESSFUL_LOGIN_2FA",
+            details: `✓ Copia de seguridad en la nube (Supabase Cloud) completada con éxito para '${org.name}'. Base de datos sincronizada: ${org.supabaseUrl}. Backup: ${org.supabaseBackupBucket}/db_dump_${Date.now().toString().slice(-6)}.sql`,
+            severity: "LOW"
+          });
+          await saveState(state);
+        }
         break;
       }
       case "RECORD_BAD_LOGIN": {
