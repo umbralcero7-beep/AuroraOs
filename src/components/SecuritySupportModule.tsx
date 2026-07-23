@@ -61,10 +61,21 @@ export default function SecuritySupportModule({
   const [isRestoring, setIsRestoring] = useState<string | null>(null);
   const [activeBackupCheck, setActiveBackupCheck] = useState(false);
   const [checkOutput, setCheckOutput] = useState<string[]>([]);
+  const [selectedModules, setSelectedModules] = useState<string[]>([
+    'pos', 'reportes', 'comandas_waiter', 'cocina_kds', 'inventario', 'contabilidad', 'rrhh', 'asistente', 'workspace'
+  ]);
 
   const handleSaveOrganization = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orgName.trim() || !orgSlug.trim()) return;
+
+    // Determine plan type: Selecting both aurora_logistics and aurora_driver upgrades to Plan Pro. Otherwise Plan Básico.
+    const hasLogistics = selectedModules.includes('aurora_logistics') && selectedModules.includes('aurora_driver');
+    const finalPlan: 'BASIC' | 'PRO' | 'ENTERPRISE' = hasLogistics ? 'PRO' : 'BASIC';
+    
+    // New requests start in PENDING_APPROVAL status. Existing requests preserve their status.
+    const originalOrg = editingOrgId ? organizations.find(o => o.id === editingOrgId) : null;
+    const finalStatus = originalOrg ? (originalOrg.status || 'ACTIVE') : 'PENDING_APPROVAL';
 
     try {
       if (editingOrgId) {
@@ -72,23 +83,26 @@ export default function SecuritySupportModule({
           id: editingOrgId,
           name: orgName,
           subdomainOrSlug: orgSlug,
-          plan: orgPlan,
+          plan: finalPlan,
           primaryContactEmail: orgContact,
           supabaseUrl: orgSupabaseUrl || "https://placeholder-url.supabase.co",
-          supabaseBackupBucket: orgBackupBucket || "backups-default"
+          supabaseBackupBucket: orgBackupBucket || "backups-default",
+          enabledModules: selectedModules,
+          status: finalStatus
         });
       } else {
         const newOrg = {
           id: `org-${Date.now()}`,
           name: orgName,
           subdomainOrSlug: orgSlug,
-          plan: orgPlan,
-          status: 'ACTIVE',
+          plan: finalPlan,
+          status: finalStatus, // PENDING_APPROVAL for new requests
           primaryContactEmail: orgContact,
           supabaseUrl: orgSupabaseUrl || `https://${orgSlug}.supabase.co`,
           supabaseBackupBucket: orgBackupBucket || `${orgSlug}-backups`,
           storageUsedMB: 0,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          enabledModules: selectedModules
         };
         await onTriggerAction("ADD_ORGANIZATION", newOrg);
       }
@@ -99,6 +113,9 @@ export default function SecuritySupportModule({
       setOrgContact('');
       setOrgSupabaseUrl('');
       setOrgBackupBucket('');
+      setSelectedModules([
+        'pos', 'reportes', 'comandas_waiter', 'cocina_kds', 'inventario', 'contabilidad', 'rrhh', 'asistente', 'workspace'
+      ]);
       setEditingOrgId(null);
       setShowAddOrg(false);
       refreshData();
@@ -115,6 +132,9 @@ export default function SecuritySupportModule({
     setOrgContact(org.primaryContactEmail);
     setOrgSupabaseUrl(org.supabaseUrl || '');
     setOrgBackupBucket(org.supabaseBackupBucket || '');
+    setSelectedModules(org.enabledModules || [
+      'pos', 'reportes', 'comandas_waiter', 'cocina_kds', 'inventario', 'contabilidad', 'rrhh', 'asistente', 'workspace'
+    ]);
     setShowAddOrg(true);
   };
 
@@ -397,26 +417,52 @@ export default function SecuritySupportModule({
                 <tbody className="divide-y divide-slate-855">
                   {organizations.map((org: any) => {
                     const isActive = org.id === activeOrgId;
+                    const isPending = org.status === 'PENDING_APPROVAL';
+                    const isRejected = org.status === 'REJECTED';
+                    const hasLogistics = org.enabledModules && org.enabledModules.includes('aurora_logistics') && org.enabledModules.includes('aurora_driver');
+                    const calculatedPlan = hasLogistics ? 'PRO' : (org.plan || 'BASIC');
+
                     return (
                       <tr key={org.id} className={`hover:bg-slate-900/40 transition-colors ${isActive ? 'bg-cyan-950/10' : ''}`}>
                         <td className="py-4 px-5">
                           <div className="font-semibold text-white flex items-center gap-2">
                             {org.name}
-                            {isActive && (
-                              <span className="text-[9px] bg-cyan-400 text-slate-950 font-bold font-mono px-1.5 py-0.2 rounded animate-pulse">
-                                ACTIVO
+                            {isPending && (
+                              <span className="text-[9px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold font-mono px-2 py-0.5 rounded animate-pulse">
+                                APROBACIÓN REQUERIDA (ISAÍAS)
+                              </span>
+                            )}
+                            {isRejected && (
+                              <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono px-1.5 py-0.5 rounded">
+                                RECHAZADO / SUSPENDIDO
+                              </span>
+                            )}
+                            {isActive && org.status === 'ACTIVE' && (
+                              <span className="text-[9px] bg-cyan-400 text-slate-950 font-bold font-mono px-1.5 py-0.2 rounded">
+                                OPERANDO ACTIVO
                               </span>
                             )}
                           </div>
                           <div className="text-[10px] text-slate-500 font-mono mt-0.5">{org.primaryContactEmail} (/{org.subdomainOrSlug})</div>
+                          
+                          {/* List of enabled modules as small dots */}
+                          {org.enabledModules && (
+                            <div className="flex flex-wrap gap-1 mt-1.5">
+                              {org.enabledModules.map((m: string) => (
+                                <span key={m} className="text-[8px] bg-slate-800 text-slate-400 px-1 py-0.2 rounded font-mono">
+                                  {m}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </td>
                         <td className="py-4 px-4">
                           <span className={`px-2 py-0.5 text-[10px] rounded font-bold ${
-                            org.plan === 'ENTERPRISE' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                            org.plan === 'PRO' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' :
-                            'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+                            calculatedPlan === 'ENTERPRISE' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                            calculatedPlan === 'PRO' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold' :
+                            'bg-slate-600/15 text-slate-400 border border-slate-600/30'
                           }`}>
-                            {org.plan}
+                            PLAN {calculatedPlan}
                           </span>
                         </td>
                         <td className="py-4 px-4 font-mono text-[10px] text-slate-400 truncate max-w-[150px]">
@@ -430,48 +476,92 @@ export default function SecuritySupportModule({
                         </td>
                         <td className="py-4 px-4 text-right">
                           <div className="flex justify-end gap-1.5 flex-wrap">
-                            <button
-                              onClick={() => setActiveOrgId && setActiveOrgId(org.id)}
-                              disabled={isActive}
-                              className={`px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer transition-all ${
-                                isActive 
-                                  ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 cursor-default'
-                                  : 'bg-cyan-500 text-slate-950 hover:bg-cyan-600'
-                              }`}
-                              title="Conmutar para operar como este restaurante"
-                            >
-                              Conmutar Contexto
-                            </button>
-                            <button
-                              onClick={() => handleTriggerBackup(org.id)}
-                              disabled={isBackingUp === org.id}
-                              className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-750 px-2.5 py-1 rounded text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
-                              title="Subir archivo SQL de respaldo a Supabase Cloud"
-                            >
-                              <Cloud className="h-3 w-3" />
-                              {isBackingUp === org.id ? 'Subiendo...' : 'Respaldar'}
-                            </button>
-                            <button
-                              onClick={() => handleTriggerRestore(org.id)}
-                              disabled={isRestoring === org.id}
-                              className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-750 px-2.5 py-1 rounded text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
-                              title="Restaurar base de datos a este snapshot"
-                            >
-                              <RefreshCw className={`h-3 w-3 ${isRestoring === org.id ? 'animate-spin' : ''}`} />
-                              Restaurar
-                            </button>
-                            <button
-                              onClick={() => handleEditOrgClick(org)}
-                              className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-750 px-2 py-1 rounded text-[10px] cursor-pointer"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              onClick={() => handleDeleteOrg(org.id)}
-                              className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-2 py-1 rounded text-[10px] cursor-pointer"
-                            >
-                              Borrar
-                            </button>
+                            {isPending ? (
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm(`¿Aprobar el aprovisionamiento de ${org.name} bajo el Plan ${calculatedPlan}?`)) {
+                                      await onTriggerAction("APPROVE_ORGANIZATION", { id: org.id });
+                                      refreshData();
+                                    }
+                                  }}
+                                  className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-3 py-1 rounded-xl text-[10px] cursor-pointer shadow-lg shadow-emerald-950/20 transition-all uppercase font-mono"
+                                >
+                                  ✓ Aprobar Plan
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm(`¿Rechazar solicitud de ${org.name}?`)) {
+                                      await onTriggerAction("REJECT_ORGANIZATION", { id: org.id });
+                                      refreshData();
+                                    }
+                                  }}
+                                  className="bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded-xl text-[10px] cursor-pointer font-mono"
+                                >
+                                  Rechazar
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => setActiveOrgId && setActiveOrgId(org.id)}
+                                  disabled={isActive || org.status !== 'ACTIVE'}
+                                  className={`px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all ${
+                                    isActive 
+                                      ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 cursor-default'
+                                      : org.status !== 'ACTIVE'
+                                      ? 'bg-slate-800 text-slate-600 border border-slate-850 cursor-not-allowed'
+                                      : 'bg-cyan-500 text-slate-950 hover:bg-cyan-600 shadow-md shadow-cyan-950/10'
+                                  }`}
+                                  title="Conmutar para operar como este restaurante"
+                                >
+                                  Conmutar Contexto
+                                </button>
+                                <button
+                                  onClick={() => handleTriggerBackup(org.id)}
+                                  disabled={isBackingUp === org.id || org.status !== 'ACTIVE'}
+                                  className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-750 px-2.5 py-1 rounded-xl text-[10px] flex items-center gap-1 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Subir archivo SQL de respaldo a Supabase Cloud"
+                                >
+                                  <Cloud className="h-3 w-3" />
+                                  {isBackingUp === org.id ? 'Subiendo...' : 'Respaldar'}
+                                </button>
+                                <button
+                                  onClick={() => handleTriggerRestore(org.id)}
+                                  disabled={isRestoring === org.id || org.status !== 'ACTIVE'}
+                                  className="bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-750 px-2.5 py-1 rounded-xl text-[10px] flex items-center gap-1 cursor-pointer transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  title="Restaurar base de datos a este snapshot"
+                                >
+                                  <RefreshCw className={`h-3 w-3 ${isRestoring === org.id ? 'animate-spin' : ''}`} />
+                                  Restaurar
+                                </button>
+                                <button
+                                  onClick={() => handleEditOrgClick(org)}
+                                  className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-750 px-2 py-1 rounded-xl text-[10px] cursor-pointer"
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteOrg(org.id)}
+                                  className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-2 py-1 rounded-xl text-[10px] cursor-pointer"
+                                >
+                                  Borrar
+                                </button>
+                                {isRejected && (
+                                  <button
+                                    onClick={async () => {
+                                      if (window.confirm(`¿Re-aprobar e iniciar el inquilino ${org.name}?`)) {
+                                        await onTriggerAction("APPROVE_ORGANIZATION", { id: org.id });
+                                        refreshData();
+                                      }
+                                    }}
+                                    className="bg-emerald-500/20 hover:bg-emerald-500/35 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-xl text-[10px] cursor-pointer"
+                                  >
+                                    Re-Activar
+                                  </button>
+                                )}
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -602,17 +692,53 @@ export default function SecuritySupportModule({
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] font-mono text-slate-400 uppercase mb-1">Plan de Suscripción</label>
-                  <select
-                    value={orgPlan}
-                    onChange={(e: any) => setOrgPlan(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-sans"
-                  >
-                    <option value="BASIC">Básico (1 Sede)</option>
-                    <option value="PRO">Profesional (Sedes ilimitadas)</option>
-                    <option value="ENTERPRISE">Enterprise (Soporte Dedicado)</option>
-                  </select>
+                <div className="bg-slate-950/60 p-3 border border-slate-800 rounded-2xl space-y-2 col-span-2">
+                  <div className="flex justify-between items-center border-b border-slate-850 pb-1.5">
+                    <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">Módulos ERP a Habilitar</span>
+                    {selectedModules.includes('aurora_logistics') && selectedModules.includes('aurora_driver') ? (
+                      <span className="text-[9px] bg-cyan-400 text-slate-950 font-bold font-mono px-2 py-0.5 rounded shadow">
+                        PLAN PRO CALCULADO
+                      </span>
+                    ) : (
+                      <span className="text-[9px] bg-slate-700 text-slate-300 font-bold font-mono px-2 py-0.5 rounded">
+                        PLAN BÁSICO CALCULADO
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                    {[
+                      { id: 'pos', name: 'Facturación & POS' },
+                      { id: 'reportes', name: 'Reportes & Auditoría' },
+                      { id: 'comandas_waiter', name: 'Comandas de Mozos' },
+                      { id: 'cocina_kds', name: 'Módulo Cocina (KDS)' },
+                      { id: 'inventario', name: 'Inventario ERP' },
+                      { id: 'contabilidad', name: 'Contabilidad' },
+                      { id: 'rrhh', name: 'Personal & Bitácora' },
+                      { id: 'asistente', name: 'Asistente IA (Cero)' },
+                      { id: 'workspace', name: 'Integración Google' },
+                      { id: 'aurora_logistics', name: '🚀 Aurora Logistics' },
+                      { id: 'aurora_driver', name: '🛵 Aurora Driver' }
+                    ].map(mod => {
+                      const checked = selectedModules.includes(mod.id);
+                      return (
+                        <label key={mod.id} className="flex items-center gap-2 bg-slate-900/50 p-1 rounded-lg border border-slate-800 hover:border-slate-700 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={checked}
+                            onChange={() => setSelectedModules(prev => 
+                              prev.includes(mod.id) ? prev.filter(x => x !== mod.id) : [...prev, mod.id]
+                            )}
+                            className="accent-cyan-400"
+                          />
+                          <span className={checked ? 'text-white font-bold' : 'text-slate-400'}>{mod.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[9px] text-slate-500 font-mono leading-relaxed mt-0.5">
+                    * Nota: Si se marcan "🚀 Aurora Logistics" y "🛵 Aurora Driver", el inquilino califica como <b>PLAN PRO</b>. De lo contrario, se aprueba en el <b>PLAN BÁSICO</b>.
+                  </p>
                 </div>
               </div>
 

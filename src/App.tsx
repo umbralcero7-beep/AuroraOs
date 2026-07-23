@@ -25,7 +25,8 @@ import AccountingModule from './components/AccountingModule';
 import InventoryModule from './components/InventoryModule';
 import KitchenModule from './components/KitchenModule';
 import WaiterModule from './components/WaiterModule';
-import DeliveryModule from './components/DeliveryModule';
+import AuroraLogisticsModule from './components/AuroraLogisticsModule';
+import AuroraDriverModule from './components/AuroraDriverModule';
 import HrModule from './components/HrModule';
 import SecuritySupportModule from './components/SecuritySupportModule';
 import AiAssistantModule from './components/AiAssistantModule';
@@ -1054,12 +1055,24 @@ export default function App() {
             </RouteGuard>
           )}
 
-          {activeTab === 'domicilios' && (
-            <RouteGuard currentUser={currentUser} moduleKey="domicilios" requiredRoles={['super_admin', 'admin', 'cashier', 'waiter']} onLogout={handleLogout}>
-              <DeliveryModule 
+          {activeTab === 'aurora_logistics' && (
+            <RouteGuard currentUser={currentUser} moduleKey="aurora_logistics" requiredRoles={['super_admin', 'admin', 'cashier']} onLogout={handleLogout}>
+              <AuroraLogisticsModule 
                 sedeId={activeSedeId}
                 domicilios={domicilios}
                 menuItems={menuItems}
+                currentUser={currentUser}
+                onTriggerAction={triggerAction}
+                refreshData={fetchState}
+              />
+            </RouteGuard>
+          )}
+
+          {activeTab === 'aurora_driver' && (
+            <RouteGuard currentUser={currentUser} moduleKey="aurora_driver" requiredRoles={['super_admin', 'admin', 'waiter']} onLogout={handleLogout}>
+              <AuroraDriverModule 
+                sedeId={activeSedeId}
+                domicilios={domicilios}
                 currentUser={currentUser}
                 onTriggerAction={triggerAction}
                 refreshData={fetchState}

@@ -1995,20 +1995,46 @@ async function loadState(): Promise<any> {
     }
   }
 
-  // FORCE RESET IF THE STATE IS NOT MARKED AS CLEANED OR CONTAINS OLD SEED RESTAURANTS
-  const hasOldData = !state || !state.isCleaned || (state.organizations && state.organizations.some((o: any) => o.id === "org-pizzanapoles" || o.id === "org-aurora"));
+  // FORCE RESET IF THE STATE IS NOT MARKED AS CLEANED OR CONTAINS OLD SEED RESTAURANTS, OR HAS EMPTY TENANTS/BRANCHES
+  const hasOldData = !state || !state.isCleaned || !state.organizations || state.organizations.length === 0 || !state.sedes || state.sedes.length === 0 || (state.organizations && state.organizations.some((o: any) => o.id === "org-pizzanapoles"));
   if (hasOldData) {
     console.log("Detected old seed data or uncleaned state. Forcing database reset to a brand new clean state...");
     state = {
       isCleaned: true,
-      sedes: [],
+      organizations: [
+        {
+          id: "org-aurora",
+          name: "Restaurante Aurora Gourmet",
+          subdomainOrSlug: "aurora",
+          plan: "PRO",
+          status: "ACTIVE",
+          primaryContactEmail: "admin@aurora.com",
+          supabaseUrl: "https://aurora.supabase.co",
+          supabaseBackupBucket: "aurora-backups",
+          storageUsedMB: 1.45,
+          createdAt: new Date().toISOString()
+        }
+      ],
+      sedes: [
+        {
+          id: "s1",
+          orgId: "org-aurora",
+          name: "Sede Medellín - El Poblado",
+          address: "Carrera 43A #10-25",
+          phone: "+57 4 3215544",
+          licenseStatus: "ACTIVE",
+          licenseExpiry: "2027-12-31",
+          monthlyFee: 150,
+          lastPaymentDate: "2026-06-01"
+        }
+      ],
       users: [
         {
           id: "u1",
           name: "Isaias",
           email: "admin@aurora.com",
           role: "super_admin",
-          sedeId: "",
+          sedeId: "s1",
           active: true,
           twoFactorEnabled: true,
           twoFactorSecret: "JBSWY3DPEHPK3PXP",
@@ -2020,14 +2046,25 @@ async function loadState(): Promise<any> {
           id: "w1",
           email: "admin@aurora.com",
           role: "super_admin",
-          sedeId: "",
+          sedeId: "s1",
           tempKey: "AURORA_SEC_99",
           createdTime: new Date().toISOString()
         }
       ],
-      insumos: [],
-      suppliers: [],
-      menuItems: [],
+      insumos: [
+        { id: "i1", name: "Pollo Entero Fresco (Kg)", sku: "RAW-CHICK-01", unit: "Kg", category: "Carnes", stock: 15.0, minStock: 5.0, costPrice: 12000, supplierId: "sup1", sedeId: "s1" },
+        { id: "i2", name: "Plátano Verde Bloque (Kg)", sku: "RAW-PLANTAIN-02", unit: "Kg", category: "Verduras", stock: 20.0, minStock: 8.0, costPrice: 3500, supplierId: "sup2", sedeId: "s1" }
+      ],
+      suppliers: [
+        { id: "sup1", name: "Distribuidora de Carnes El Corral", phone: "+57 4 5551234", email: "ventas@elcorral.com", category: "Carnes y Congelados" },
+        { id: "sup2", name: "Fruver La Huerta del Pueblo", phone: "+57 1 7776543", email: "pedidos@lahuerta.com", category: "Granos y Verduras" }
+      ],
+      menuItems: [
+        { id: "m-01", name: "POLLO ASADO", price: 45000, category: "PLATOS_FUERTES", description: "Pollo asado entero jugoso con papas criollas y ensalada fresca.", ingredients: [{ insumoId: "i1", qty: 1.0 }], available: true, sedeId: "s1" },
+        { id: "m-02", name: "ENTRADA DE PATACONES", price: 18000, category: "ENTRADAS", description: "Cuatro patacones crujientes acompañados de hogao casero y guacamole.", ingredients: [{ insumoId: "i2", qty: 0.5 }], available: true, sedeId: "s1" },
+        { id: "m-03", name: "JUGO NATURAL DE MARACUYÁ", price: 8000, category: "BEBIDAS", description: "Jugo refrescante en agua o leche.", ingredients: [], available: true, sedeId: "s1" },
+        { id: "m-04", name: "TRES LECHES DE AREQUIPE", price: 12000, category: "POSTRES", description: "Postre tradicional bañado en tres leches con arequipe premium.", ingredients: [], available: true, sedeId: "s1" }
+      ],
       comandas: [],
       domicilios: [],
       gastos: [],
@@ -2040,7 +2077,7 @@ async function loadState(): Promise<any> {
           timestamp: new Date().toISOString(),
           ip: "127.0.0.1",
           emailAttempted: "admin@aurora.com",
-          sedeId: "",
+          sedeId: "s1",
           type: "SYSTEM_RESET",
           details: "El sistema ha sido limpiado por completo para la presentación de la Demo.",
           severity: "HIGH"
@@ -2051,8 +2088,7 @@ async function loadState(): Promise<any> {
         cushionTarget: 25000000,
         activeBufferAmount: 0,
         cushionHistory: []
-      },
-      organizations: []
+      }
     };
     // Ensure file exists and database is updated
     try {
@@ -2401,6 +2437,65 @@ app.post("/api/action", async (req, res) => {
       case "ADD_ORGANIZATION": {
         if (!state.organizations) state.organizations = [];
         state.organizations.push(payload);
+        // Automatically seed a default Sede for this new organization
+        if (!state.sedes) state.sedes = [];
+        state.sedes.push({
+          id: `s-${payload.subdomainOrSlug}`,
+          orgId: payload.id,
+          name: `Sede ${payload.name} - Principal`,
+          address: "Calle de la Gastronomía # 4-20",
+          phone: "+57 300 000 0000",
+          licenseStatus: payload.status === "ACTIVE" ? "ACTIVE" : "PENDING_PAYMENT",
+          licenseExpiry: "2027-12-31",
+          monthlyFee: payload.plan === "PRO" ? 250 : 150,
+          lastPaymentDate: new Date().toISOString().split('T')[0]
+        });
+        await saveState(state);
+        break;
+      }
+      case "APPROVE_ORGANIZATION": {
+        if (!state.organizations) state.organizations = [];
+        state.organizations = state.organizations.map((org: any) => 
+          org.id === payload.id ? { ...org, status: 'ACTIVE' } : org
+        );
+        if (state.sedes) {
+          state.sedes = state.sedes.map((s: any) => 
+            s.orgId === payload.id ? { ...s, licenseStatus: 'ACTIVE' } : s
+          );
+        }
+        state.securityLogs.unshift({
+          id: `sec-appr-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          ip: "127.0.0.1",
+          emailAttempted: "Isaias (Super Admin)",
+          sedeId: "",
+          type: "SYSTEM_RESET",
+          details: `✓ APROBACIÓN EXITOSA: Super Admin Isaias aprobó el aprovisionamiento de la organización ID ${payload.id}. Licencias de sedes activadas.`,
+          severity: "MEDIUM"
+        });
+        await saveState(state);
+        break;
+      }
+      case "REJECT_ORGANIZATION": {
+        if (!state.organizations) state.organizations = [];
+        state.organizations = state.organizations.map((org: any) => 
+          org.id === payload.id ? { ...org, status: 'REJECTED' } : org
+        );
+        if (state.sedes) {
+          state.sedes = state.sedes.map((s: any) => 
+            s.orgId === payload.id ? { ...s, licenseStatus: 'SUSPENDED' } : s
+          );
+        }
+        state.securityLogs.unshift({
+          id: `sec-rej-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          ip: "127.0.0.1",
+          emailAttempted: "Isaias (Super Admin)",
+          sedeId: "",
+          type: "FIREWALL_BLOCK",
+          details: `⚠️ RECHAZADO: Super Admin Isaias rechazó o suspendió el aprovisionamiento de la organización ID ${payload.id}.`,
+          severity: "MEDIUM"
+        });
         await saveState(state);
         break;
       }

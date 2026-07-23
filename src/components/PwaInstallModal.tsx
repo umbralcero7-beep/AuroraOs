@@ -54,6 +54,7 @@ export default function PwaInstallModal({ isOpen, onClose, deferredPrompt }: Pwa
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   const target = e.currentTarget;
+                  target.onerror = null;
                   target.src = '/icon_192.png';
                 }}
               />

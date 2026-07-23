@@ -17,7 +17,8 @@ import {
   X,
   Coffee,
   Download,
-  Cloud
+  Cloud,
+  Navigation as NavigationIcon
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -72,7 +73,8 @@ export default function Navigation({
     { id: 'reportes', name: 'Reportes & Auditoría', icon: BarChart3, roles: ['super_admin', 'admin'] },
     { id: 'comandas_waiter', name: 'Módulo de Comandas', icon: Coffee, roles: ['super_admin', 'admin', 'waiter'] },
     { id: 'cocina_kds', name: 'Módulo de Cocina (KDS)', icon: ChefHat, roles: ['super_admin', 'admin', 'kitchen'] },
-    { id: 'domicilios', name: 'Domicilios & Repartidor', icon: Truck, roles: ['super_admin', 'admin', 'cashier', 'waiter'] },
+    { id: 'aurora_logistics', name: 'Aurora Logistics', icon: Truck, roles: ['super_admin', 'admin', 'cashier'] },
+    { id: 'aurora_driver', name: 'Aurora Driver', icon: NavigationIcon, roles: ['super_admin', 'admin', 'waiter'] },
     { id: 'inventario', name: 'Inventario ERP', icon: Package2, roles: ['super_admin', 'admin'] },
     { id: 'contabilidad', name: 'Contabilidad & Colchón', icon: DollarSign, roles: ['super_admin', 'admin'] },
     { id: 'rrhh', name: 'Personal & Bitácora', icon: Users2, roles: ['super_admin', 'admin'] },
@@ -81,12 +83,18 @@ export default function Navigation({
     { id: 'seguridad', name: 'Soporte & Ciberseguridad', icon: Lock, roles: ['super_admin'] }
   ];
 
-  // Filter tabs by role and explicit allowedModules
-  const allowedTabs = tabs.filter(t => 
-    currentUser.role === 'super_admin' || 
-    t.roles.includes(currentUser.role) ||
-    (currentUser.allowedModules && currentUser.allowedModules.includes(t.id))
-  );
+  // Filter tabs by role, allowedModules, and active plan
+  const allowedTabs = tabs.filter(t => {
+    // Plan restrictions: Logistics modules require PRO or ENTERPRISE
+    const isLogisticsTab = t.id === 'aurora_logistics' || t.id === 'aurora_driver';
+    if (isLogisticsTab && activeOrg.plan !== 'PRO' && activeOrg.plan !== 'ENTERPRISE') {
+      return false;
+    }
+
+    return currentUser.role === 'super_admin' || 
+      t.roles.includes(currentUser.role) ||
+      (currentUser.allowedModules && currentUser.allowedModules.includes(t.id));
+  });
 
   const activeSede = sedes.find(s => s.id === selectedSedeId) || sedes[0];
 
@@ -125,6 +133,7 @@ export default function Navigation({
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.currentTarget;
+                    target.onerror = null;
                     target.src = '/icon_192.png';
                   }}
                 />

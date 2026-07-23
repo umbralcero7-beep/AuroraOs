@@ -4,6 +4,9 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-primary: #075D42;
+  --color-accent: #FAA713;
+  --color-neutral-cream: #EEE8DF;
 }
 
 @utility glass {
